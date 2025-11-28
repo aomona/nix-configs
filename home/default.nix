@@ -3,7 +3,7 @@
     ./programs/git.nix
     ./programs/files.nix
     ./programs/packages.nix
-    ./programs/gnome.nix
+    ./programs/vr.nix
   ];
 
   home.stateVersion = "25.05";
