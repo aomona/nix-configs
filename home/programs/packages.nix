@@ -19,7 +19,6 @@
       _1password-gui
       tor-browser
       gh
-      vrc-get
       unityhub
       claude-code
       bs-manager
@@ -38,16 +37,13 @@
       fastfetch
       tree
       xdg-utils
-      nix-index
       wl-clipboard
-      ollama-cuda
       slack
       ghostty
       direnv
       libreoffice
       signal-desktop
       termius
-      kdePackages.dolphin
       bat
       jq
     ])
