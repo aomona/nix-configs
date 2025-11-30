@@ -28,7 +28,7 @@
       lutris
     ])
     ++ (with pkgs-stable; [
-      # stable 25.11
+      # stable 25.05
       vim
       nixd
       nil
