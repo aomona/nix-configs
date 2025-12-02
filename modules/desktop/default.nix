@@ -14,8 +14,8 @@
   # programs.dconf.enable = true;
 
   # KDE Plasma用
-  services.displayManager.sddm.enable = true;
-  services.desktopManager.plasma6.enable = true;
+  # services.displayManager.sddm.enable = true;
+  # services.desktopManager.plasma6.enable = true;
 
   # Cosmic
   services.desktopManager.cosmic.enable = true;
