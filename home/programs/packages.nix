@@ -1,33 +1,10 @@
 {
   pkgs,
-  pkgs-stable,
+  pkgs-unstable,
   ...
 }: {
   home.packages =
     (with pkgs; [
-      vesktop
-      zed-editor
-      osu-lazer-bin
-      lmstudio
-      wlx-overlay-s
-      obsidian
-      zoom-us
-      spotify
-      google-chrome
-      vrcx
-      _1password-gui
-      tor-browser
-      gh
-      unityhub
-      claude-code
-      bs-manager
-      alcom
-      wineWowPackages.stable # 64bit + 32bit対応
-      winetricks
-      lutris
-    ])
-    ++ (with pkgs-stable; [
-      # stable 25.05
       vim
       nixd
       nil
@@ -46,5 +23,28 @@
       bat
       jq
       wget
+      lmstudio
+      wlx-overlay-s
+      tor-browser
+      alcom
+      _1password-gui
+      google-chrome
+    ])
+    ++ (with pkgs-unstable; [
+      # unstable 26.05
+      vesktop
+      zed-editor
+      osu-lazer-bin
+      obsidian
+      zoom-us
+      spotify
+      vrcx
+      gh
+      unityhub
+      claude-code
+      bs-manager
+      wineWowPackages.stable # 64bit + 32bit対応
+      winetricks
+      lutris
     ]);
 }
