@@ -45,5 +45,6 @@
       termius
       bat
       jq
+      wget
     ]);
 }

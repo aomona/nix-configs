@@ -9,6 +9,7 @@
     ../../modules/audio
     ../../modules/users
     ../../modules/gaming
+    ../../modules/virtualization
   ];
 
   nix.settings.experimental-features = ["nix-command" "flakes"];
