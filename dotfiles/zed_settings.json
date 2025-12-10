@@ -1,5 +1,5 @@
 {
-  "icon_theme": "Catppuccin Frappé - No Italics",
+  "icon_theme": "Catppuccin Frappé",
   "agent": {
     "default_profile": "ask",
     "default_model": {
@@ -12,11 +12,14 @@
   "buffer_font_size": 16,
   "theme": {
     "mode": "system",
-    "light": "Catppuccin Macchiato",
+    "light": "Catppuccin Macchiato - No Italics",
     "dark": "One Dark"
   },
   "lsp": {
     "nil": {
+      "binary": {
+        "path": "nil"
+      },
       "settings": {
         "formatting": {
           "command": ["alejandra"]
