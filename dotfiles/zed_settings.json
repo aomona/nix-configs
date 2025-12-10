@@ -15,6 +15,12 @@
     "light": "Catppuccin Macchiato - No Italics",
     "dark": "One Dark"
   },
+  "languages": {
+    "Nix": {
+      "language_servers": ["nil"],
+      "format_on_save": "on"
+    }
+  },
   "lsp": {
     "nil": {
       "binary": {
