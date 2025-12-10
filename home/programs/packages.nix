@@ -29,12 +29,34 @@
       alcom
       _1password-gui
       google-chrome
+      osu-lazer-bin
+
+      # Hyprlandエコシステム
+      fuzzel # アプリランチャー
+      swww # 壁紙(アニメーション対応)
+      grim # スクリーンショット
+      slurp # 領域選択
+      swappy # スクリーンショット編集
+      cliphist # クリップボード履歴
+      swaylock-effects # スクリーンロック
+      swayidle # アイドル管理
+      brightnessctl # 輝度調整
+      playerctl # メディアコントロール
+      pavucontrol # 音量設定GUI
+      networkmanagerapplet # ネットワーク管理
+      blueman # Bluetooth管理
+      wlogout # ログアウトメニュー
+      hyprpicker # カラーピッカー
+      hyprcursor # カーソルテーマ
+      nwg-look # GTKテーマ設定
+      libsForQt5.qt5ct # Qtテーマ設定
+      kdePackages.qt6ct
+      polkit_gnome # 認証エージェント
     ])
     ++ (with pkgs-unstable; [
       # unstable 26.05
       vesktop
       zed-editor
-      osu-lazer-bin
       obsidian
       zoom-us
       spotify
