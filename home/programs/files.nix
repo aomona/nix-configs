@@ -5,6 +5,5 @@
     ".config/zed/settings.json".source = ../../dotfiles/zed_settings.json;
     ".config/git/ignore".source = ../../dotfiles/gitignore;
     ".config/swaylock/config".source = ../../dotfiles/swaylock_config;
-    ".icons/MilkCursor".source = ../../cursors;
   };
 }
