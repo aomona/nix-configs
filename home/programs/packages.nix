@@ -37,7 +37,6 @@
       unar
       tmux
       kooha
-      nushell
 
       # Hyprlandエコシステム
       fuzzel # アプリランチャー
