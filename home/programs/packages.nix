@@ -2,7 +2,8 @@
   pkgs,
   pkgs-unstable,
   ...
-}: {
+}:
+{
   home.packages =
     (with pkgs; [
       vim
@@ -34,6 +35,8 @@
       nautilus
       code-cursor
       unar
+      tmux
+      kooha
 
       # Hyprlandエコシステム
       fuzzel # アプリランチャー
