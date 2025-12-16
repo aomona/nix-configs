@@ -10,6 +10,7 @@
   },
   "ui_font_size": 16,
   "buffer_font_size": 16,
+  "buffer_font_family": "FiraCode Nerd Font",
   "theme": {
     "mode": "system",
     "light": "Catppuccin Macchiato - No Italics",
@@ -19,5 +20,8 @@
     "Nix": {
       "language_servers": ["nixd", "!nil"]
     }
+  },
+  "terminal": {
+    "font_family": "FiraCode Nerd Font"
   }
 }

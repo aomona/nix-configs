@@ -1,4 +1,5 @@
-{pkgs, ...}: {
+{ pkgs, ... }:
+{
   time.timeZone = "Asia/Tokyo";
 
   i18n.defaultLocale = "ja_JP.UTF-8";
@@ -33,5 +34,7 @@
     ipafont
     kochi-substitute
     inter
+    nerd-fonts.fira-code
+    fira-code
   ];
 }
