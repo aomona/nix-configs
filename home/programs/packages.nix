@@ -36,7 +36,8 @@
       kooha
       yt-dlp
       ffmpeg
-      spicetify-cli
+      gemini-cli-bin
+      btop-cuda
 
       # Hyprlandエコシステム
       fuzzel # アプリランチャー
@@ -59,6 +60,10 @@
       libsForQt5.qt5ct # Qtテーマ設定
       kdePackages.qt6ct
       polkit_gnome # 認証エージェント
+    ])
+    ++ (with pkgs.cudaPackages_12_8; [
+      # CUDA 12.8 (機械学習用)
+      cudatoolkit
     ])
     ++ (with pkgs-unstable; [
       # unstable 26.05
