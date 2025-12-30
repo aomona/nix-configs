@@ -12,6 +12,10 @@
       url = "github:nix-community/nixvim/nixos-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -20,6 +24,7 @@
     nixpkgs-unstable,
     home-manager,
     nixvim,
+    lanzaboote,
   }: let
     system = "x86_64-linux";
     pkgs-unstable = import nixpkgs-unstable {
@@ -35,6 +40,7 @@
       modules = [
         ./configuration.nix
         ./packages
+        lanzaboote.nixosModules.lanzaboote
         home-manager.nixosModules.home-manager
         {
           home-manager.useGlobalPkgs = true;

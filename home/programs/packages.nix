@@ -80,6 +80,8 @@
       wineWowPackages.stable # 64bit + 32bit対応
       winetricks
       lutris
+      opencode
+      nvtopPackages.nvidia
     ]);
 
   programs.vscode = {

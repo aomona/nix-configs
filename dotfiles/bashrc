@@ -9,7 +9,3 @@ export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 export NIX_SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 
 export HISTTIMEFORMAT="%F %T "
-
-if ($env.TERM_PROGRAM? == "Ghostty") {
-    $env.TERM = "xterm-256color"
-}

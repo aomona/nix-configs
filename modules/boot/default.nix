@@ -1,18 +1,18 @@
-{ ... }:
+{ pkgs, lib, ... }:
 {
-  #boot.loader.systemd-boot.enable = true;
-  boot.loader.grub = {
+  boot.loader.systemd-boot.enable = lib.mkForce false;
+
+  boot.lanzaboote = {
     enable = true;
-    device = "nodev";
-    efiSupport = true;
-    efiInstallAsRemovable = true;
-    useOSProber = true;
+    pkiBundle = "/var/lib/sbctl";
   };
-  #boot.loader.efi.canTouchEfiVariables = true;
+
   boot.supportedFilesystems = [
     "ntfs"
     "ext4"
     "btrfs"
     "xfs"
   ];
+  environment.systemPackages = [ pkgs.sbctl ];
+
 }
