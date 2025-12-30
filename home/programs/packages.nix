@@ -82,6 +82,8 @@
       lutris
       opencode
       nvtopPackages.nvidia
+      protonup-qt
+      vlc
     ]);
 
   programs.vscode = {
