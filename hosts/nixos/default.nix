@@ -11,6 +11,7 @@
     ../../modules/users
     ../../modules/gaming
     ../../modules/virtualization
+    ../../modules/flatpak
   ];
 
   nix.settings.experimental-features = [
@@ -34,5 +35,5 @@
     vim
   ];
 
-  system.stateVersion = "25.05";
+  system.stateVersion = "25.11";
 }

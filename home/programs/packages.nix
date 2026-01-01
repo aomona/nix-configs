@@ -38,6 +38,7 @@
       ffmpeg
       gemini-cli-bin
       btop-cuda
+      kitty
 
       # Hyprlandエコシステム
       fuzzel # アプリランチャー

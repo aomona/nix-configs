@@ -16,42 +16,48 @@
       url = "github:nix-community/lanzaboote";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    nixpkgs-unstable,
-    home-manager,
-    nixvim,
-    lanzaboote,
-  }: let
-    system = "x86_64-linux";
-    pkgs-unstable = import nixpkgs-unstable {
-      inherit system;
-      config.allowUnfree = true;
-    };
-  in {
-    nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
-      inherit system;
-      specialArgs = {
-        inherit self pkgs-unstable;
+  outputs =
+    {
+      self,
+      nixpkgs,
+      nixpkgs-unstable,
+      home-manager,
+      nixvim,
+      lanzaboote,
+      nix-flatpak,
+    }:
+    let
+      system = "x86_64-linux";
+      pkgs-unstable = import nixpkgs-unstable {
+        inherit system;
+        config.allowUnfree = true;
       };
-      modules = [
-        ./configuration.nix
-        ./packages
-        lanzaboote.nixosModules.lanzaboote
-        home-manager.nixosModules.home-manager
-        {
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-          home-manager.users.akazdayo = import ./home;
-          home-manager.extraSpecialArgs = {
-            inherit pkgs-unstable;
-            nixvim-module = nixvim.homeModules.nixvim;
-          };
-        }
-      ];
+    in
+    {
+      nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = {
+          inherit self pkgs-unstable;
+        };
+        modules = [
+          ./configuration.nix
+          ./packages
+          lanzaboote.nixosModules.lanzaboote
+          home-manager.nixosModules.home-manager
+          nix-flatpak.nixosModules.nix-flatpak
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.users.akazdayo = import ./home;
+            home-manager.extraSpecialArgs = {
+              inherit pkgs-unstable;
+              nixvim-module = nixvim.homeModules.nixvim;
+            };
+          }
+        ];
+      };
     };
-  };
 }
