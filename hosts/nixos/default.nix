@@ -27,6 +27,8 @@
 
   services.printing.enable = true;
 
+  services.tailscale.enable = true;
+
   services.cloudflared = {
     enable = true;
   };

@@ -39,6 +39,7 @@
       gemini-cli-bin
       btop-cuda
       kitty
+      tailscale
 
       # Hyprlandエコシステム
       fuzzel # アプリランチャー
