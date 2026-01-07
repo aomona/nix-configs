@@ -26,9 +26,6 @@
       fileencoding = "utf-8";
       fileencodings = "utf-8,sjis,euc-jp,iso-2022-jp";
 
-      # 全角文字の幅を適切に処理
-      ambiwidth = "double";
-
       # 全角スペースを可視化
       list = true;
       listchars = "tab:»-,trail:-,extends:»,precedes:«,nbsp:%";
@@ -133,15 +130,54 @@
       indent-blankline = {
         enable = true;
       };
+
+      # 関数シグネチャ表示
+      lsp-signature = {
+        enable = true;
+        settings = {
+          hint_enable = true;
+          hint_prefix = " ";
+          floating_window = true;
+          bind = true;
+        };
+      };
     };
 
-    lsp.servers = {
-      nixd.enable = true;
-      nushell.enable = true;
-      tsgo.enable = true;
-      rust_analyzer.enable = true;
-      svelte.enable = true;
+    plugins.lsp = {
+      enable = true;
+      servers = {
+        nixd.enable = true;
+        nushell.enable = true;
+        tsgo.enable = true;
+        rust_analyzer.enable = true;
+        svelte.enable = true;
+      };
     };
+
+    # 診断設定（カーソル位置の警告を自動表示）
+    diagnostics = {
+      virtual_text = true;
+      float = {
+        border = "rounded";
+        source = true;
+      };
+    };
+
+    autoCmd = [
+      {
+        event = "CursorHold";
+        pattern = "*";
+        callback.__raw = ''
+          function()
+            vim.diagnostic.open_float(nil, { focus = false })
+          end
+        '';
+      }
+    ];
+
+    # CursorHoldの発火時間を短くする（デフォルト4000ms → 300ms）
+    opts.updatetime = 300;
+
 
     # キーマップ
     keymaps = [
@@ -194,7 +230,88 @@
         };
       }
 
-      # TODO(human): お好みのキーマップを追加してください
+      # LSP キーマップ
+      {
+        mode = "n";
+        key = "K";
+        action.__raw = "vim.lsp.buf.hover";
+        options = {
+          silent = true;
+          desc = "Show hover information";
+        };
+      }
+      {
+        mode = "n";
+        key = "gd";
+        action.__raw = "vim.lsp.buf.definition";
+        options = {
+          silent = true;
+          desc = "Go to definition";
+        };
+      }
+      {
+        mode = "n";
+        key = "gD";
+        action.__raw = "vim.lsp.buf.declaration";
+        options = {
+          silent = true;
+          desc = "Go to declaration";
+        };
+      }
+      {
+        mode = "n";
+        key = "gi";
+        action.__raw = "vim.lsp.buf.implementation";
+        options = {
+          silent = true;
+          desc = "Go to implementation";
+        };
+      }
+      {
+        mode = "n";
+        key = "gr";
+        action.__raw = "vim.lsp.buf.references";
+        options = {
+          silent = true;
+          desc = "Show references";
+        };
+      }
+      {
+        mode = "n";
+        key = "<leader>rn";
+        action.__raw = "vim.lsp.buf.rename";
+        options = {
+          silent = true;
+          desc = "Rename symbol";
+        };
+      }
+      {
+        mode = "n";
+        key = "<leader>ca";
+        action.__raw = "vim.lsp.buf.code_action";
+        options = {
+          silent = true;
+          desc = "Code action";
+        };
+      }
+      {
+        mode = "n";
+        key = "<leader>D";
+        action.__raw = "vim.lsp.buf.type_definition";
+        options = {
+          silent = true;
+          desc = "Type definition";
+        };
+      }
+      {
+        mode = "n";
+        key = "<leader>fs";
+        action.__raw = "vim.lsp.buf.signature_help";
+        options = {
+          silent = true;
+          desc = "Signature help";
+        };
+      }
     ];
 
     # グローバル設定

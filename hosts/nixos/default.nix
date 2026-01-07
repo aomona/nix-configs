@@ -25,6 +25,13 @@
 
   programs.nix-ld.enable = true;
 
+  programs.nh = {
+    enable = true;
+    clean.enable = true;
+    clean.extraArgs = "--keep-since 4d --keep 3";
+    flake = "/home/akazdayo/configs/"; # sets NH_OS_FLAKE variable for you
+  };
+
   services.printing.enable = true;
 
   services.tailscale.enable = true;
@@ -33,6 +40,12 @@
     enable = true;
   };
 
+  services.sunshine = {
+    enable=true;
+    autoStart=false;
+    openFirewall=true;
+    capSysAdmin=true;
+  };
   environment.systemPackages = with pkgs; [
     vim
   ];
