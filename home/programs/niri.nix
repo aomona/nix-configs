@@ -1,4 +1,12 @@
-{ ... }:
+{ pkgs, ... }:
+let
+  # Noctalia IPC コマンド生成ヘルパー
+  noctalia =
+    cmd:
+    ''spawn "noctalia-shell" "ipc" "call" ${
+      pkgs.lib.concatMapStringsSep " " (s: ''"${s}"'') (pkgs.lib.splitString " " cmd)
+    }'';
+in
 {
   # niri設定ファイル（元のデフォルト設定 + 出力設定）
   xdg.configFile."niri/config.kdl".text = ''
@@ -341,7 +349,7 @@
 
         // Suggested binds for running programs: terminal, app launcher, screen locker.
         Mod+T hotkey-overlay-title="Open a Terminal: alacritty" { spawn "alacritty"; }
-        Mod+D hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
+        Mod+D hotkey-overlay-title="Open Noctalia Launcher" { ${noctalia "launcher toggle"}; }
         Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
 
         // Use spawn-sh to run a shell command. Do this if you need pipes, multiple commands, etc.
@@ -589,7 +597,7 @@
         //
         // The allow-inhibiting=false property can be applied to other binds as well,
         // which ensures niri always processes them, even when an inhibitor is active.
-        Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
+        Mod+Escape allow-inhibiting=false { ${noctalia "sessionMenu toggle"}; }
 
         // The quit action will show a confirmation dialog to avoid accidental exits.
         Mod+Shift+E { quit; }
