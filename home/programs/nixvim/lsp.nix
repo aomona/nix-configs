@@ -9,7 +9,11 @@
         nushell.enable = true;
         tsgo.enable = true;
         ts_ls.enable = true;
-        rust_analyzer.enable = true;
+        rust_analyzer = {
+          enable = true;
+          installCargo = true;
+          installRustc = true;
+        };
         svelte.enable = true;
         ty.enable = true;
         ruff.enable = true;
