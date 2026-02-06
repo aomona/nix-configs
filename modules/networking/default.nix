@@ -1,5 +1,10 @@
 { ... }:
 {
+  imports = [
+    ./tailscale.nix
+    ./cloudflared.nix
+  ];
+
   networking.hostName = "nixos";
   networking.nameservers = [ "192.168.11.62" ];
   networking.networkmanager.enable = true;

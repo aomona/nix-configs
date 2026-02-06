@@ -1,13 +1,13 @@
 { pkgs, pkgs-unstable, ... }:
 {
   imports = [
+    ./firefox.nix
+    ./printing.nix
+    ./sunshine.nix
     ./wayland/login.nix
     ./wayland/niri.nix
     ./wayland/variable.nix
   ];
-
-  # NVIDIAドライバ（Waylandでも必要）
-  services.xserver.videoDrivers = [ "nvidia" ];
 
   # XDGポータル(スクリーンシェア、ファイルピッカー)
   xdg.portal = {
