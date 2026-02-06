@@ -5,6 +5,7 @@
     ./programs/git.nix
     ./programs/files.nix
     ./programs/packages.nix
+    ./programs/vscode.nix
     ./programs/noctalia.nix
     ./programs/niri.nix
     ./programs/cursor.nix

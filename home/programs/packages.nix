@@ -84,8 +84,4 @@
       wireguard-tools
       codex
     ]);
-
-  programs.vscode = {
-    enable = true;
-  };
 }
