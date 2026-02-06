@@ -17,6 +17,7 @@
       tree
       xdg-utils
       wl-clipboard
+      xwayland-satellite
       slack
       ghostty
       libreoffice
@@ -40,6 +41,7 @@
       btop-cuda
       tailscale
       lazygit
+      nostui
 
       # Wayland共通ツール
       brightnessctl # 輝度調整
@@ -61,6 +63,9 @@
       unityhub
       nvtopPackages.nvidia
       protonup-qt
+      kdePackages.dolphin
+      immich-go
+      zoom-us
     ])
     ++ (with pkgs.cudaPackages_12_8; [
       # CUDA 12.8 (機械学習用)
@@ -69,6 +74,9 @@
     ++ (with pkgs-unstable; [
       # unstable 26.05
       opencode
+      wayvr
+      protonvpn-gui
+      wireguard-tools
     ]);
 
   programs.vscode = {
