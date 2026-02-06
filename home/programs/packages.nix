@@ -1,6 +1,7 @@
 {
   pkgs,
   pkgs-unstable,
+  pkgs-with-llm-agents,
   ...
 }:
 {
@@ -66,6 +67,11 @@
       kdePackages.dolphin
       immich-go
       zoom-us
+
+    ])
+    ++ (with pkgs-with-llm-agents.llm-agents; [
+      # LLM Agents from numtide/llm-agents.nix
+      opencode
     ])
     ++ (with pkgs.cudaPackages_12_8; [
       # CUDA 12.8 (機械学習用)
@@ -73,10 +79,10 @@
     ])
     ++ (with pkgs-unstable; [
       # unstable 26.05
-      opencode
       wayvr
       protonvpn-gui
       wireguard-tools
+      codex
     ]);
 
   programs.vscode = {

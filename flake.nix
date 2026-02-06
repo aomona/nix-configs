@@ -23,6 +23,8 @@
       url = "github:noctalia-dev/noctalia-shell";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    llm-agents.url = "github:numtide/llm-agents.nix";
   };
 
   outputs =
@@ -35,12 +37,18 @@
       lanzaboote,
       nix-flatpak,
       noctalia,
+      llm-agents,
     }@inputs:
     let
       system = "x86_64-linux";
       pkgs-unstable = import nixpkgs-unstable {
         inherit system;
         config.allowUnfree = true;
+      };
+      pkgs-with-llm-agents = import nixpkgs {
+        inherit system;
+        config.allowUnfree = true;
+        overlays = [ llm-agents.overlays.default ];
       };
     in
     {
@@ -60,7 +68,7 @@
             home-manager.useUserPackages = true;
             home-manager.users.akazdayo = import ./home;
             home-manager.extraSpecialArgs = {
-              inherit pkgs-unstable inputs;
+              inherit pkgs-unstable pkgs-with-llm-agents inputs;
               nixvim-module = nixvim.homeModules.nixvim;
             };
           }
