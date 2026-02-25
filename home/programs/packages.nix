@@ -7,6 +7,7 @@
 {
   home.packages =
     (with pkgs; [
+      godot_4
       comma
       creator-companion-tui
       vpm-cli
