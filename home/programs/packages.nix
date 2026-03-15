@@ -12,7 +12,6 @@
       comma
       creator-companion-tui
       vpm-cli
-      vrcli
       devenv
       vim
       nixd
