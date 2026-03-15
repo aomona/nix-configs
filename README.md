@@ -58,6 +58,21 @@ nixos-rebuild dry-build --flake .#nixos
 nix flake check
 ```
 
+## GitHub Actionsで自動更新
+
+`.github/workflows/flake-update.yml` で、3日に1回 `nix flake update` を実行します。
+更新があった場合は以下を自動で行います。
+
+1. `flake.lock` を更新
+2. `.#nixosConfigurations.nixos.config.system.build.toplevel` をビルド
+3. ビルド結果をCachixへpush
+4. `flake.lock` をコミットして `main` にpush
+
+必要なGitHub設定:
+
+- Actions secret: `CACHIX_AUTH_TOKEN`
+- Actions variable（任意）: `CACHIX_CACHE_NAME`（未設定時は `akazdayo` を使用）
+
 ## 新しいモジュールを追加する
 
 1. `modules/` に新しいディレクトリとファイルを作成
