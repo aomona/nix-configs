@@ -2,6 +2,7 @@
 set -euo pipefail
 
 export PATH="$HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:$PATH"
+host_name="${HOST_NAME:-nixos}"
 
 git config user.name "github-actions[bot]"
 git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -13,7 +14,7 @@ if git diff --quiet -- flake.lock; then
   exit 0
 fi
 
-nix build .#nixosConfigurations.nixos.config.system.build.toplevel --print-build-logs
+nix build ".#nixosConfigurations.${host_name}.config.system.build.toplevel" --print-build-logs
 
 echo "Build completed. cachix-action will push built paths to Cachix via its post-build hook."
 

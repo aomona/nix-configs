@@ -11,8 +11,11 @@ starship init nu | save -f ($nu.data-dir | path join "vendor/autoload/starship.n
     direnv export json | from json | default {} | load-env
 }
 
-# Aliases
-alias rebuild = sudo nixos-rebuild switch --flake /home/akazdayo/configs#nixos
+# Commands
+def --wrapped rebuild [...rest: string] {
+    sudo nixos-rebuild switch --flake $"($env.HOME)/configs#(^hostname | str trim)" ...$rest
+}
+
 alias alcom = with-env {
     GDK_BACKEND: "x11",
     __NV_DISABLE_EXPLICIT_SYNC: "1",

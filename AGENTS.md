@@ -1,7 +1,7 @@
 # AGENTS.md
 
 ## Build & Test Commands
-- **Apply Config**: `sudo nixos-rebuild switch --flake .#nixos`
+- **Apply Config**: `sudo nixos-rebuild switch --flake .#nixos` (replace `nixos` with another host as needed)
 - **Test Config**: `sudo nixos-rebuild test --flake .#nixos`
 - **Dry Run**: `nixos-rebuild dry-build --flake .#nixos`
 - **Lint/Check**: `nix flake check`
@@ -9,9 +9,10 @@
 ## Code Style & Conventions
 - **Structure**: Modular Flake config. System settings in `modules/`, user settings in `home/`.
 - **Modules**: Use `default.nix` as directory entry point. Import sub-modules in `default.nix`.
-- **Arguments**: Modules typically accept `{ pkgs, pkgs-unstable, ... }`.
+- **Arguments**: Modules typically accept `{ pkgs, pkgs-unstable, ... }`. Host-aware modules may also receive `hostMeta`.
 - **Registration**:
-  - System modules: Add to imports in `hosts/nixos/default.nix`.
+  - Shared system modules: Add to imports in `hosts/common/default.nix`.
+  - Host-only system modules: Add to imports in `hosts/<host>/default.nix`.
   - Home Manager modules: Add to imports in `home/default.nix`.
 - **Formatting**: Standard Nix formatting. Prefer clarity and modularity.
 - **Versions**: Maintain `system.stateVersion = "25.11"` and `home.stateVersion = "25.11"`.
@@ -34,7 +35,8 @@
 - **Naming**:
   - New file and directory names must use lowercase kebab-case.
 - **Import Registration**:
-  - New system modules must be wired through a parent `default.nix` and imported from `hosts/nixos/default.nix`.
+  - New shared system modules must be wired through a parent `default.nix` and imported from `hosts/common/default.nix`.
+  - Host-only modules stay in `hosts/<host>/default.nix`.
   - New Home Manager modules must be imported from `home/default.nix`.
 - **Security (Principle with Exceptions)**:
   - Principle: Do not hardcode secrets (API keys, tokens, passwords) in tracked files.

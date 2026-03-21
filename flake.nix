@@ -40,39 +40,69 @@
       llm-agents,
     }@inputs:
     let
-      system = "x86_64-linux";
-      pkgs-unstable = import nixpkgs-unstable {
-        inherit system;
-        config.allowUnfree = true;
-      };
-      pkgs-with-llm-agents = import nixpkgs {
-        inherit system;
-        config.allowUnfree = true;
-        overlays = [ llm-agents.overlays.default ];
+      lib = nixpkgs.lib;
+      defaultPrimaryUser = "akazdayo";
+
+      mkPkgsUnstable =
+        system:
+        import nixpkgs-unstable {
+          inherit system;
+          config.allowUnfree = true;
+        };
+
+      mkPkgsWithLlmAgents =
+        system:
+        import nixpkgs {
+          inherit system;
+          config.allowUnfree = true;
+          overlays = [ llm-agents.overlays.default ];
+        };
+
+      mkHost =
+        hostName:
+        {
+          system ? "x86_64-linux",
+          primaryUser ? defaultPrimaryUser,
+          flakeRoot ? null,
+        }:
+        let
+          resolvedFlakeRoot =
+            if flakeRoot == null then "/home/${primaryUser}/configs" else flakeRoot;
+          hostMeta = {
+            inherit hostName system primaryUser;
+            flakeRoot = resolvedFlakeRoot;
+          };
+          pkgs-unstable = mkPkgsUnstable system;
+          pkgs-with-llm-agents = mkPkgsWithLlmAgents system;
+        in
+        lib.nixosSystem {
+          inherit system;
+          specialArgs = {
+            inherit self inputs pkgs-unstable hostMeta;
+          };
+          modules = [
+            ./packages
+            (./hosts + "/${hostName}")
+            lanzaboote.nixosModules.lanzaboote
+            home-manager.nixosModules.home-manager
+            nix-flatpak.nixosModules.nix-flatpak
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.users.${primaryUser} = import ./home;
+              home-manager.extraSpecialArgs = {
+                inherit pkgs-unstable pkgs-with-llm-agents inputs hostMeta;
+                nixvim-module = nixvim.homeModules.nixvim;
+              };
+            }
+          ];
+        };
+
+      hosts = {
+        nixos = { };
       };
     in
     {
-      nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
-        inherit system;
-        specialArgs = {
-          inherit self pkgs-unstable inputs;
-        };
-        modules = [
-          ./configuration.nix
-          ./packages
-          lanzaboote.nixosModules.lanzaboote
-          home-manager.nixosModules.home-manager
-          nix-flatpak.nixosModules.nix-flatpak
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.users.akazdayo = import ./home;
-            home-manager.extraSpecialArgs = {
-              inherit pkgs-unstable pkgs-with-llm-agents inputs;
-              nixvim-module = nixvim.homeModules.nixvim;
-            };
-          }
-        ];
-      };
+      nixosConfigurations = lib.mapAttrs mkHost hosts;
     };
 }

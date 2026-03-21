@@ -1,10 +1,10 @@
 # Gemini Context for NixOS Configuration
 
 ## Project Overview
-This is a modular **NixOS configuration** project using **Flakes**. It manages the system configuration for the host `nixos` and user configuration via **Home Manager**.
+This is a modular **NixOS configuration** project using **Flakes**. It manages multiple host configurations from one repository and attaches shared **Home Manager** settings to each host's primary user.
 
 - **User:** `akazdayo`
-- **Host:** `nixos`
+- **Current host:** `nixos`
 - **System:** `x86_64-linux`
 - **NixOS Version:** 25.11 (with `nixos-unstable` available as an overlay).
 - **Key Inputs:** `nixpkgs`, `home-manager`, `nixvim`.
@@ -14,9 +14,9 @@ This is a modular **NixOS configuration** project using **Flakes**. It manages t
 The configuration is highly modularized to separate system-level settings, hardware specifics, and user-level applications.
 
 ### Key Files
-- **`flake.nix`**: The entry point. Defines inputs (nixpkgs, home-manager, nixvim) and the `nixos` system configuration. It passes `pkgs-unstable` into `specialArgs`.
-- **`configuration.nix`**: A wrapper that simply imports `./hosts/nixos`.
-- **`hosts/nixos/default.nix`**: The effective `configuration.nix` for the specific host. Imports hardware config and modules.
+- **`flake.nix`**: The entry point. Defines inputs and generates `nixosConfigurations.<host>` from host metadata. It passes `pkgs-unstable` and `hostMeta` into modules.
+- **`hosts/common/default.nix`**: Shared NixOS module composition for all hosts.
+- **`hosts/nixos/default.nix`**: The current host definition. Imports shared modules and host-specific hardware config.
 - **`home/default.nix`**: The entry point for Home Manager configuration.
 
 ### Directory Breakdown
@@ -51,7 +51,7 @@ nix flake update
 
 ### Adding New System Features
 1.  Create a new module in `modules/<category>/<feature>.nix` (or `default.nix` in a subdirectory).
-2.  Import the new module in `hosts/nixos/default.nix`.
+2.  Import the new module in `hosts/common/default.nix` for shared features, or `hosts/<host>/default.nix` for host-only features.
 
 ### Adding User/Home Manager Features
 1.  Create a new configuration file in `home/programs/<feature>.nix`.

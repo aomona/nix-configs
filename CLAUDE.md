@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is a modular NixOS configuration using Flakes and Home Manager for user "akazdayo". The configuration is structured with a clear separation between system-level (`modules/`) and user-level (`home/`) settings.
+This is a modular NixOS configuration using Flakes and Home Manager for user "akazdayo". The configuration is structured for multiple hosts with a clear separation between shared system-level modules (`modules/`), host composition (`hosts/`), and user-level settings (`home/`).
 
 ## Common Commands
 
@@ -38,14 +38,15 @@ nix flake lock --update-input nixpkgs-unstable
 ### Flake Structure
 - Uses two nixpkgs inputs: `nixpkgs` (25.11 stable) and `nixpkgs-unstable`
 - The flake passes `pkgs-unstable` as `specialArgs` to both NixOS modules and Home Manager
-- Single host configuration named "nixos"
+- Host configurations are generated from metadata in `flake.nix`
 - `allowUnfree = true` is configured for unstable packages in the flake
 
 ### Module Organization
 The configuration follows a modular pattern where:
 
-1. **Entry Point**: `configuration.nix` imports `hosts/nixos/default.nix`
-2. **Host Configuration**: `hosts/nixos/default.nix` imports all system modules from `modules/`
+1. **Flake Entry Point**: `flake.nix` generates `nixosConfigurations.<host>` from host metadata
+2. **Shared Host Layer**: `hosts/common/default.nix` imports shared system modules from `modules/`
+3. **Host Configuration**: `hosts/<host>/default.nix` imports `../common` and host-specific hardware/configuration
 3. **System Modules** (`modules/`): Feature-based organization
    - `audio/` - PipeWire configuration
    - `boot/` - Bootloader settings
@@ -57,7 +58,7 @@ The configuration follows a modular pattern where:
    - `users/` - User account definitions
    - `virtualization/` - Docker and container configurations
 
-4. **Home Manager** (`home/`): User-specific settings for `akazdayo`
+4. **Home Manager** (`home/`): Shared home profile attached to the host's `primaryUser`
    - Configured via flake's `home-manager.nixosModules.home-manager`
    - Uses `useGlobalPkgs = true` and `useUserPackages = true`
    - `home/default.nix` imports programs from `home/programs/`
@@ -76,7 +77,7 @@ Some modules use a parent `default.nix` that imports sub-modules:
 
 ### System Module
 1. Create `modules/new-feature/default.nix`
-2. Add to imports in `hosts/nixos/default.nix`
+2. Add to imports in `hosts/common/default.nix` for shared modules, or `hosts/<host>/default.nix` for host-only modules
 3. Module receives `pkgs`, `pkgs-unstable`, and `self` as available arguments
 
 ### Home Manager Module
@@ -86,10 +87,10 @@ Some modules use a parent `default.nix` that imports sub-modules:
 
 ## Important Notes
 
-- System state version: 25.05
+- System state version: 25.11
 - Home Manager state version: 25.11
 - Experimental features enabled: `nix-command`, `flakes`
-- `allowUnfree = true` is set in both `hosts/nixos/default.nix` and the flake (for unstable packages)
-- User: `akazdayo`
+- `allowUnfree = true` is configured in the flake imports for stable and unstable package sets
+- Primary user default: `akazdayo`
 - Architecture: `x86_64-linux`
 - System packages: Firefox and nix-ld are enabled at the system level

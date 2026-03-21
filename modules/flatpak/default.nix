@@ -11,6 +11,7 @@ in
     enable = true;
     packages = [
       "org.prismlauncher.PrismLauncher"
+      "org.gnome.Snapshot"
       #{
       #  flatpakref = alvrFlatpakrefUrl;
       #  sha256 = "sha256-lmO9lnguAZ9G6iI4Dq6h93D6aLMo3QqFJBlCCbFGPPk=";

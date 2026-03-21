@@ -3,10 +3,13 @@ echo $SHELL
 eval "$(starship init bash)"
 eval "$(direnv hook bash)"
 
-alias "rebuild"="sudo nixos-rebuild switch --flake /home/akazdayo/configs#nixos"
+rebuild() {
+  sudo nixos-rebuild switch --flake "$HOME/configs#$(hostname)" "$@"
+}
+
 alias "alcom"="GDK_BACKEND=x11 __NV_DISABLE_EXPLICIT_SYNC=1 WEBKIT_DISABLE_DMABUF_RENDERER=1 ALCOM"
 
-export PATH="/home/akazdayo/.bun/bin:$PATH"
+export PATH="$HOME/.bun/bin:$PATH"
 export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 export NIX_SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 

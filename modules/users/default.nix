@@ -1,8 +1,11 @@
-{ pkgs, ... }:
+{ pkgs, hostMeta, ... }:
+let
+  primaryUser = hostMeta.primaryUser;
+in
 {
-  users.users.akazdayo = {
+  users.users.${primaryUser} = {
     isNormalUser = true;
-    description = "akazdayo";
+    description = primaryUser;
     extraGroups = [
       "networkmanager"
       "wheel"

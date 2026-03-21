@@ -1,19 +1,7 @@
 { ... }:
 {
   imports = [
-    ../../hardware-configuration.nix
-    ../../modules/boot
-    ../../modules/system
-    ../../modules/networking
-    ../../modules/locale
-    ../../modules/desktop
-    ../../modules/hardware
-    ../../modules/audio
-    ../../modules/users
-    ../../modules/gaming
-    ../../modules/virtualization
-    ../../modules/flatpak
+    ../common
+    ./hardware-configuration.nix
   ];
-
-  system.stateVersion = "25.11";
 }

@@ -1,15 +1,19 @@
 # NixOS Configuration
 
-モジュール化されたNixOS設定ファイルです。
+複数ホストを同じリポジトリで管理しやすくした、モジュール化された NixOS + Home Manager 設定です。
 
 ## ディレクトリ構造
 
 ```
 .
-├── configuration.nix          # メインエントリーポイント（hosts/nixosをインポート）
 ├── flake.nix                  # Flake設定
-├── hardware-configuration.nix # ハードウェア自動検出設定
 ├── dotfiles/                  # シェル設定ファイル
+├── hosts/                     # ホスト構成
+│   ├── common/                # 全ホスト共通のシステムモジュール束ね
+│   │   └── default.nix
+│   └── nixos/                 # 現在のホスト
+│       ├── default.nix        # このホストの構成エントリーポイント
+│       └── hardware-configuration.nix
 ├── home/                      # Home Manager設定
 │   ├── default.nix           # Home Managerのメインファイル
 │   └── programs/             # プログラム別設定
@@ -17,9 +21,6 @@
 │       ├── gnome.nix         # GNOME/dconf設定
 │       ├── packages.nix      # ユーザーパッケージ
 │       └── shell.nix         # シェル設定
-├── hosts/                     # ホスト固有の設定
-│   └── nixos/                # ホスト "nixos"
-│       └── default.nix       # このホストのメイン設定
 └── modules/                   # 機能別モジュール
     ├── audio/                # オーディオ設定（PipeWire）
     ├── boot/                 # ブート設定
@@ -39,6 +40,8 @@
 ```bash
 sudo nixos-rebuild switch --flake .#nixos
 ```
+
+別ホストを追加した場合は `.#<host>` を使います。
 
 ### 設定をテストする（再起動せずに適用）
 
@@ -64,7 +67,7 @@ nix flake check
 更新があった場合は以下を自動で行います。
 
 1. `flake.lock` を更新
-2. `.#nixosConfigurations.nixos.config.system.build.toplevel` をビルド
+2. `.#nixosConfigurations.${HOST_NAME:-nixos}.config.system.build.toplevel` をビルド
 3. ビルド結果をCachixへpush
 4. `flake.lock` をコミットして `main` にpush
 
@@ -76,7 +79,8 @@ nix flake check
 ## 新しいモジュールを追加する
 
 1. `modules/` に新しいディレクトリとファイルを作成
-2. `hosts/nixos/default.nix` の `imports` に追加
+2. 共通機能なら `hosts/common/default.nix` の `imports` に追加
+3. 特定ホスト専用なら `hosts/<host>/default.nix` の `imports` に追加
 
 例：
 ```nix
@@ -87,7 +91,7 @@ nix flake check
 ```
 
 ```nix
-# hosts/nixos/default.nix
+# hosts/common/default.nix
 {
   imports = [
     # ...
@@ -100,11 +104,3 @@ nix flake check
 
 1. `home/programs/` に新しいファイルを作成
 2. `home/default.nix` の `imports` に追加
-
-## バックアップファイル
-
-以下のファイルは元の設定のバックアップです：
-- `configuration.nix.backup` - 元のconfiguration.nix
-- `home.nix.backup` - 元のhome.nix
-
-設定が正常に動作することを確認したら削除できます。
