@@ -1,11 +1,8 @@
 { pkgs, ... }:
-let
-  myCursor = pkgs.callPackage ../../cursors/chiffon.nix { };
-in
 {
   home.pointerCursor = {
-    package = myCursor;
-    name = "MyCustomCursor"; # index.themeに書いたNameと一致させる
+    package = pkgs.adwaita-icon-theme;
+    name = "Adwaita";
     size = 24;
     gtk.enable = true;
     x11.enable = true;
