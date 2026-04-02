@@ -7,6 +7,7 @@
 {
   home.packages =
     (with pkgs; [
+      nextcloud-client
       prismlauncher
       gimp
       godot_4
