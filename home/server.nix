@@ -4,7 +4,7 @@
     ./programs/git.nix
     ./programs/nushell.nix
     ./programs/nixvim
-    ./programs/packages.nix
+    ./programs/packages-server.nix
   ];
   home.stateVersion = "25.11";
 }

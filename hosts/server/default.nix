@@ -1,13 +1,13 @@
 { ... }:
 {
   imports = [
-    ../../modules/boot
-    ../../modules/system
-    ../../modules/networking
-    ../../modules/locale
-    ../../modules/users
-    ../../modules/virtualization
-    ../../modules/containers
+    ../../modules/boot/server.nix
+    ../../modules/system/server.nix
+    ../../modules/networking/server.nix
+    ../../modules/locale/server.nix
+    ../../modules/users/server.nix
+    ../../modules/virtualization/server.nix
+    ../../modules/containers/server.nix
     ./hardware-configuration.nix
   ];
 

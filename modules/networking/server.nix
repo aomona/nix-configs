@@ -3,11 +3,10 @@
   imports = [
     ./tailscale.nix
     ./cloudflared.nix
-    ./vpn.nix
   ];
 
   networking.hostName = hostMeta.hostName;
-  networking.nameservers = [ "192.168.11.62" ];
+  networking.nameservers = [ "192.168.11.50" ];
   networking.networkmanager.enable = true;
   services.nscd.enableNsncd = true;
 

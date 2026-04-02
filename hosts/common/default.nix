@@ -1,17 +1,17 @@
 { ... }:
 {
   imports = [
-    ../../modules/boot
-    ../../modules/system
-    ../../modules/networking
-    ../../modules/locale
-    ../../modules/desktop
-    ../../modules/hardware
-    ../../modules/audio
-    ../../modules/users
-    ../../modules/gaming
-    ../../modules/virtualization
-    ../../modules/flatpak
+    ../../modules/boot/desktop.nix
+    ../../modules/system/desktop.nix
+    ../../modules/networking/desktop.nix
+    ../../modules/locale/desktop.nix
+    ../../modules/desktop/desktop.nix
+    ../../modules/hardware/desktop.nix
+    ../../modules/audio/desktop.nix
+    ../../modules/users/desktop.nix
+    ../../modules/gaming/desktop.nix
+    ../../modules/virtualization/desktop.nix
+    ../../modules/flatpak/desktop.nix
   ];
 
   system.stateVersion = "25.11";
