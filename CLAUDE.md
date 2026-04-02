@@ -4,19 +4,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is a modular NixOS configuration using Flakes and Home Manager for user "akazdayo". The configuration is structured for multiple hosts with a clear separation between shared system-level modules (`modules/`), host composition (`hosts/`), and user-level settings (`home/`).
+This is a modular NixOS configuration using Flakes and Home Manager for user "akazdayo". It manages two hosts: `nixos` (desktop) and `server`, with a clear separation between shared system-level modules (`modules/`), host composition (`hosts/`), and user-level settings (`home/`).
 
 ## Common Commands
 
 ### Build and Apply Configuration
 ```bash
-# Apply configuration and switch (most common)
-sudo nixos-rebuild switch --flake .#nixos
+# Apply desktop configuration (preferred: uses nh for cleaner output)
+nh os switch
 
-# Test configuration without making it default boot option
+# Apply with explicit flake target
+sudo nixos-rebuild switch --flake .#nixos   # desktop
+sudo nixos-rebuild switch --flake .#server  # server
+
+# Test without making default boot option
 sudo nixos-rebuild test --flake .#nixos
 
-# Dry build to check for errors without applying
+# Dry build to check for errors
 nixos-rebuild dry-build --flake .#nixos
 
 # Check flake for issues
@@ -28,7 +32,7 @@ nix flake check
 # Update all flake inputs
 nix flake update
 
-# Update specific input (e.g., nixpkgs or nixpkgs-unstable)
+# Update specific input
 nix flake lock --update-input nixpkgs
 nix flake lock --update-input nixpkgs-unstable
 ```
@@ -36,61 +40,70 @@ nix flake lock --update-input nixpkgs-unstable
 ## Architecture
 
 ### Flake Structure
-- Uses two nixpkgs inputs: `nixpkgs` (25.11 stable) and `nixpkgs-unstable`
-- The flake passes `pkgs-unstable` as `specialArgs` to both NixOS modules and Home Manager
-- Host configurations are generated from metadata in `flake.nix`
-- `allowUnfree = true` is configured for unstable packages in the flake
+- Two nixpkgs inputs: `nixpkgs` (25.11 stable) and `nixpkgs-unstable`
+- Key flake inputs: `home-manager`, `nixvim`, `lanzaboote` (secure boot), `nix-flatpak`, `noctalia` (QuickShell), `llm-agents`
+- Two host factory functions in `flake.nix`: `mkHost` (desktop) and `mkServer`
+- `specialArgs` passed to NixOS modules: `self`, `inputs`, `pkgs-unstable`, `hostMeta`
+- `extraSpecialArgs` passed to Home Manager: `pkgs-unstable`, `pkgs-with-llm-agents`, `inputs`, `hostMeta`, `nixvim-module`
+- `hostMeta` contains: `hostName`, `system`, `primaryUser`, `flakeRoot`
 
-### Module Organization
-The configuration follows a modular pattern where:
+### Module Naming Convention
+Modules use a host-type suffix pattern: `desktop.nix` for the desktop host, `server.nix` for the server. A parent `desktop.nix` or `server.nix` in each category often imports sub-modules (e.g., `modules/gaming/desktop.nix` imports `steam.nix`, `wivrn.nix`, `slimevr.nix`).
 
-1. **Flake Entry Point**: `flake.nix` generates `nixosConfigurations.<host>` from host metadata
-2. **Shared Host Layer**: `hosts/common/default.nix` imports shared system modules from `modules/`
-3. **Host Configuration**: `hosts/<host>/default.nix` imports `../common` and host-specific hardware/configuration
-3. **System Modules** (`modules/`): Feature-based organization
-   - `audio/` - PipeWire configuration
-   - `boot/` - Bootloader settings
-   - `desktop/` - Desktop environment configuration
-   - `gaming/` - Steam, VR (WiVRn), and SlimeVR configurations
-   - `hardware/` - NVIDIA drivers (open source), swap configuration
-   - `locale/` - Locale, fonts, input methods
-   - `networking/` - Network configuration
-   - `users/` - User account definitions
-   - `virtualization/` - Docker and container configurations
+### Host Composition
+- **Desktop** (`hosts/nixos`): imports `hosts/common/default.nix` + hardware config
+  - `hosts/common/default.nix` imports all `modules/*/desktop.nix` files
+- **Server** (`hosts/server`): directly imports `modules/*/server.nix` + hardware config
 
-4. **Home Manager** (`home/`): Shared home profile attached to the host's `primaryUser`
-   - Configured via flake's `home-manager.nixosModules.home-manager`
-   - Uses `useGlobalPkgs = true` and `useUserPackages = true`
-   - `home/default.nix` imports programs from `home/programs/`
-   - Programs: git, files, packages, hyprland
-   - State version: 25.11
+### System Modules (`modules/`)
+Each category has `desktop.nix` and/or `server.nix`:
+- `audio/` - PipeWire (desktop only)
+- `boot/` - Bootloader (lanzaboote/secure boot)
+- `containers/` - OCI containers (adguard-home on server; desktop variant also exists)
+- `desktop/` - Desktop environment (niri compositor, Firefox, printing, Sunshine)
+- `flatpak/` - Flatpak support (desktop only)
+- `gaming/` - Steam, WiVRn, SlimeVR, ALVR (desktop only)
+- `hardware/` - NVIDIA drivers, swap, mounts, pen tablet
+- `locale/` - Locale, fonts, input methods
+- `networking/` - Network config, Cloudflared, Tailscale
+- `system/` - Core nix settings, nh, nix-ld, 1Password, packages
+- `users/` - User account definitions
+- `virtualization/` - Docker
 
-5. **Custom Packages** (`packages/default.nix`): Overlays for custom package builds
-   - Contains commented WiVRn overlay (currently disabled)
+### Home Manager (`home/`)
+- Desktop home: `home/default.nix` → imports from `home/programs/`
+- Server home: `home/server.nix` → imports from `home/programs/packages-server.nix`
+- Desktop programs: git, files, packages, vscode, noctalia, niri, cursor, nushell, nixvim, obs, immich_backups
+- nixvim config is split: `home/programs/nixvim/` (colorscheme, keymaps, lsp, opts, plugins)
 
-### Multi-File Module Pattern
-Some modules use a parent `default.nix` that imports sub-modules:
-- `modules/gaming/default.nix` imports `steam.nix`, `wivrn.nix`, `slimevr.nix`
-- `modules/virtualization/default.nix` imports `docker.nix`
+### Custom Packages (`packages/`)
+- `packages/default.nix`: NixOS module that loads overlays
+- `packages/overlays/default.nix`: Auto-loads all `.nix` files in `overlays/` as nixpkgs overlays using `nixpkgs.overlays`
+- Each overlay file (e.g., `wivrn.nix`, `vpm-cli.nix`, `creator-companion-tui.nix`) is a `callPackage`-compatible function; the package name is derived from the filename
+
+### Cursor Themes (`cursors/`)
+Custom cursor packages (`chiffon.nix`, `milk.nix`) used in home configuration.
 
 ## Adding New Modules
 
 ### System Module
-1. Create `modules/new-feature/default.nix`
-2. Add to imports in `hosts/common/default.nix` for shared modules, or `hosts/<host>/default.nix` for host-only modules
-3. Module receives `pkgs`, `pkgs-unstable`, and `self` as available arguments
+1. Create `modules/new-feature/desktop.nix` (and/or `server.nix`)
+2. Add to imports in `hosts/common/default.nix` (desktop) or `hosts/server/default.nix` (server)
+3. Available args: `pkgs`, `pkgs-unstable`, `self`, `inputs`, `hostMeta`
 
 ### Home Manager Module
 1. Create `home/programs/new-program.nix`
 2. Add to imports in `home/default.nix`
-3. Module receives `pkgs` and `pkgs-unstable` as available arguments
+3. Available args: `pkgs`, `pkgs-unstable`, `pkgs-with-llm-agents`, `inputs`, `hostMeta`
+
+### Custom Package / Overlay
+1. Create `packages/overlays/new-package.nix` as a standard `callPackage` function
+2. It is automatically picked up — no manual registration needed
 
 ## Important Notes
 
-- System state version: 25.11
-- Home Manager state version: 25.11
+- System and Home Manager state version: 25.11
 - Experimental features enabled: `nix-command`, `flakes`
-- `allowUnfree = true` is configured in the flake imports for stable and unstable package sets
-- Primary user default: `akazdayo`
-- Architecture: `x86_64-linux`
-- System packages: Firefox and nix-ld are enabled at the system level
+- `allowUnfree = true` for stable, unstable, and llm-agents package sets
+- Primary user: `akazdayo`; default architecture: `x86_64-linux`
+- `nh` is configured with `clean.enable = true` (keeps 4 days / 3 generations); `flake` points to `hostMeta.flakeRoot` (`/home/akazdayo/configs` by default)
