@@ -12,7 +12,7 @@
     };
 
     config =
-      { ... }:
+      { pkgs, ... }:
       {
         networking.interfaces.mv-eno1 = {
           useDHCP = false;
@@ -29,7 +29,7 @@
         services.nextcloud = {
           enable = true;
           hostName = "192.168.11.63";
-          https = false;
+          https = true;
           config = {
             adminuser = "admin";
             adminpassFile = "/run/secrets/nextcloud-adminpass";
@@ -38,7 +38,35 @@
           database.createLocally = true;
         };
 
-        services.nginx.enable = true;
+        services.nginx = {
+          enable = true;
+          virtualHosts."192.168.11.63" = {
+            sslCertificate = "/var/lib/nextcloud-certs/cert.pem";
+            sslCertificateKey = "/var/lib/nextcloud-certs/key.pem";
+          };
+        };
+
+        systemd.services.generate-nextcloud-cert = {
+          description = "Generate self-signed certificate for Nextcloud";
+          before = [ "nginx.service" ];
+          wantedBy = [ "nginx.service" ];
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+          };
+          script = '' # すごく無理のある実装でおもろい
+            if [ ! -f /var/lib/nextcloud-certs/cert.pem ]; then
+              mkdir -p /var/lib/nextcloud-certs
+              ${pkgs.openssl}/bin/openssl req -x509 -newkey rsa:4096 \
+                -keyout /var/lib/nextcloud-certs/key.pem \
+                -out /var/lib/nextcloud-certs/cert.pem \
+                -days 3650 -nodes \
+                -subj "/CN=192.168.11.63"
+              chmod 600 /var/lib/nextcloud-certs/key.pem
+              chmod 644 /var/lib/nextcloud-certs/cert.pem
+            fi
+          '';
+        };
 
         networking.firewall = {
           allowedTCPPorts = [
