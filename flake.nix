@@ -98,11 +98,56 @@
           ];
         };
 
+      mkServer =
+        hostName:
+        {
+          system ? "x86_64-linux",
+          primaryUser ? defaultPrimaryUser,
+          flakeRoot ? null,
+        }:
+        let
+          resolvedFlakeRoot =
+            if flakeRoot == null then "/home/${primaryUser}/configs" else flakeRoot;
+          hostMeta = {
+            inherit hostName system primaryUser;
+            flakeRoot = resolvedFlakeRoot;
+          };
+          pkgs-unstable = mkPkgsUnstable system;
+          pkgs-with-llm-agents = mkPkgsWithLlmAgents system;
+        in
+        lib.nixosSystem {
+          inherit system;
+          specialArgs = {
+            inherit self inputs pkgs-unstable hostMeta;
+          };
+          modules = [
+            ./packages
+            (./hosts + "/${hostName}")
+            lanzaboote.nixosModules.lanzaboote
+            home-manager.nixosModules.home-manager
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.users.${primaryUser} = import ./home/server.nix;
+              home-manager.extraSpecialArgs = {
+                inherit pkgs-unstable pkgs-with-llm-agents inputs hostMeta;
+                nixvim-module = nixvim.homeModules.nixvim;
+              };
+            }
+          ];
+        };
+
       hosts = {
         nixos = { };
       };
+
+      servers = {
+        server = { };
+      };
     in
     {
-      nixosConfigurations = lib.mapAttrs mkHost hosts;
+      nixosConfigurations =
+        (lib.mapAttrs mkHost hosts) //
+        (lib.mapAttrs mkServer servers);
     };
 }
