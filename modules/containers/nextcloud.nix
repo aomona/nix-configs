@@ -31,6 +31,7 @@
           hostName = "192.168.11.63";
           https = false;
           config = {
+            adminuser = "admin";
             adminpassFile = "/run/secrets/nextcloud-adminpass";
             dbtype = "pgsql";
           };
