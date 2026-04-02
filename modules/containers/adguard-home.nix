@@ -1,19 +1,14 @@
 { ... }:
 {
-  networking.macvlans.mv-adguard = {
-    interface = "eno1";
-    mode = "bridge";
-  };
-
   containers.adguard-home = {
     autoStart = true;
     privateNetwork = true;
-    interfaces = [ "mv-adguard" ];
+    macvlans = [ "eno1" ];
 
     config =
       { ... }:
       {
-        networking.interfaces.mv-adguard = {
+        networking.interfaces.mv-eno1 = {
           useDHCP = false;
           ipv4.addresses = [
             {
