@@ -3,6 +3,7 @@
   imports = [
     inputs.noctalia.homeModules.default
     ./programs/git.nix
+    ./programs/ssh.nix
     ./programs/files.nix
     ./programs/packages.nix
     ./programs/vscode.nix
