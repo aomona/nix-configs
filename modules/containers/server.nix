@@ -2,6 +2,7 @@
 {
   imports = [
     ./adguard-home.nix
+    ./immich.nix
     ./nextcloud.nix
   ];
 
