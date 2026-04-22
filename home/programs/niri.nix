@@ -1,13 +1,9 @@
-{ pkgs, ... }:
-let
+{pkgs, ...}: let
   # Noctalia IPC コマンド生成ヘルパー
-  noctalia =
-    cmd:
-    ''spawn "noctalia-shell" "ipc" "call" ${
+  noctalia = cmd: ''spawn "noctalia-shell" "ipc" "call" ${
       pkgs.lib.concatMapStringsSep " " (s: ''"${s}"'') (pkgs.lib.splitString " " cmd)
     }'';
-in
-{
+in {
   # niri設定ファイル（元のデフォルト設定 + 出力設定）
   xdg.configFile."niri/config.kdl".text = ''
     // This config is in the KDL format: https://kdl.dev
@@ -312,6 +308,11 @@ in
         default-column-width {}
     }
 
+    window-rule {
+        match app-id=r#"^flameshot$"#
+        open-floating true
+    }
+
     // Open the Firefox picture-in-picture player as floating by default.
     window-rule {
         // This app-id regular expression will work for both:
@@ -593,9 +594,9 @@ in
         // Mod+Space       { switch-layout "next"; }
         // Mod+Shift+Space { switch-layout "prev"; }
 
-        Print { screenshot; }
-        Ctrl+Print { screenshot-screen; }
-        Alt+Print { screenshot-window; }
+        Print { spawn "flameshot" "gui"; }
+        Ctrl+Print { spawn "flameshot" "screen" "--clipboard"; }
+        Alt+Print { spawn "flameshot" "full" "--clipboard"; }
 
         // Applications such as remote-desktop clients and software KVM switches may
         // request that niri stops processing the keyboard shortcuts defined here

@@ -15,10 +15,11 @@
           installRustc = true;
         };
         svelte.enable = true;
-        ty.enable = true;
+        pyrefly.enable = true;
         ruff.enable = true;
         astro.enable = true;
         gopls.enable = true;
+        zls.enable = true;
       };
     };
 

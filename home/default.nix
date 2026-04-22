@@ -1,10 +1,10 @@
-{ inputs, ... }:
-{
+{inputs, ...}: {
   imports = [
     inputs.noctalia.homeModules.default
     ./programs/git.nix
     ./programs/ssh.nix
     ./programs/files.nix
+    ./programs/flameshot.nix
     ./programs/packages.nix
     ./programs/vscode.nix
     ./programs/noctalia.nix

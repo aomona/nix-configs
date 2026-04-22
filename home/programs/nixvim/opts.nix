@@ -17,6 +17,8 @@
 
       termguicolors = true;
 
+      wrap = false;
+
       # 日本語設定
       encoding = "utf-8";
       fileencoding = "utf-8";
