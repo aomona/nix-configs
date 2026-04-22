@@ -2,19 +2,18 @@
   "instances": {
     "survival": {
       "software": {
-        "type": "fabric",
-        "minecraftVersion": "1.21.4",
-        "fabric": {
-          "loaderVersion": null,
-          "launcherVersion": null
+        "type": "neoforge",
+        "minecraftVersion": "1.21.1",
+        "neoforge": {
+          "version": null
         }
       },
       "mods": {
         "modrinth": [
           {
-            "project": "lithium",
+            "project": "create",
             "version": null,
-            "loader": null,
+            "loader": "neoforge",
             "releaseType": "release",
             "optional": false
           }

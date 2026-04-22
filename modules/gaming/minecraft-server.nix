@@ -10,17 +10,17 @@
     lockFile = ./minecraft-server-lock.json;
 
     software = {
-      type = "fabric";
-      minecraftVersion = "1.21.4";
-      fabric = {
-        loaderVersion = "0.19.2";
-        launcherVersion = "1.1.1";
+      type = "neoforge";
+      minecraftVersion = "1.21.1";
+      neoforge = {
+        version = "21.1.227";
       };
     };
 
     mods.modrinth = [
       {
-        project = "lithium";
+        project = "create";
+        loader = "neoforge";
       }
     ];
 

@@ -3,16 +3,16 @@
     "survival": {
       "artifacts": [
         {
-          "filename": "fabric-server-1.21.4-0.19.2-1.1.1.jar",
-          "hash": "sha256-fFFNJKpSiwIPzDbfNZvEtEZmb53UHd5oZx4+3NdM73Y=",
-          "ref": "server:fabric:1.21.4:0.19.2:1.1.1",
-          "url": "https://meta.fabricmc.net/v2/versions/loader/1.21.4/0.19.2/1.1.1/server/jar"
+          "filename": "neoforge-21.1.227-installer.jar",
+          "hash": "sha256-W5ir1p9hwPY5AezQdx8hdek6DR2U4fK1pte/e99mjdw=",
+          "ref": "server:neoforge:1.21.1:21.1.227",
+          "url": "https://maven.neoforged.net/releases/net/neoforged/neoforge/21.1.227/neoforge-21.1.227-installer.jar"
         },
         {
-          "filename": "lithium-fabric-0.15.3+mc1.21.4.jar",
-          "hash": "sha256-FTiR6NaYj+3/pQmIUacloTfD5coEqJqN9An+sxNiPrQ=",
-          "ref": "modrinth:auto:lithium:latest:release:false",
-          "url": "https://cdn.modrinth.com/data/gvQqBUqZ/versions/u8pHPXJl/lithium-fabric-0.15.3%2Bmc1.21.4.jar"
+          "filename": "create-1.21.1-6.0.10.jar",
+          "hash": "sha256-74f+Vwnxuh9bi7IKKSW1r7RmnheP1ti/EMFndZ7v43o=",
+          "ref": "modrinth:neoforge:create:latest:release:false",
+          "url": "https://cdn.modrinth.com/data/LNytGWDc/versions/UjX6dr61/create-1.21.1-6.0.10.jar"
         }
       ]
     }
