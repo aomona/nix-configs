@@ -18,6 +18,7 @@
         pyrefly.enable = true;
         ruff.enable = true;
         astro.enable = true;
+        gleam.enable = true;
         gopls.enable = true;
         zls.enable = true;
       };
