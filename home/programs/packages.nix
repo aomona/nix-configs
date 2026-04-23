@@ -8,7 +8,14 @@
   home.packages =
     (with pkgs; [
       nextcloud-client
-      prismlauncher
+      (prismlauncher.override {
+        jdks = [
+          jdk25
+          jdk21
+          jdk17
+          jdk8
+        ];
+      })
       gimp
       godot_4
       comma
