@@ -1,7 +1,7 @@
-{ pkgs, pkgs-unstable, ... }:
+{ pkgs, ... }:
 let
   appName = "omni-tts-discord";
-  bunPkg = pkgs-unstable.bun;
+  nodePkg = pkgs.nodejs;
   appSource = pkgs.fetchFromGitHub {
     owner = "akazdayo";
     repo = "omni-tts-discord";
@@ -60,7 +60,7 @@ in
           "d ${stateDir} 0750 root root -"
           "d ${appRoot} 0750 root root -"
           "d ${cacheDir} 0750 root root -"
-          "d ${cacheDir}/bun 0750 root root -"
+          "d ${cacheDir}/npm 0750 root root -"
           "d ${cacheDir}/uv 0750 root root -"
         ];
 
@@ -81,8 +81,12 @@ in
           };
           script = ''
             export HOME=${stateDir}
-            export BUN_INSTALL_CACHE_DIR=${cacheDir}/bun
             export UV_CACHE_DIR=${cacheDir}/uv
+            export npm_config_cache=${cacheDir}/npm
+            export npm_config_update_notifier=false
+            export npm_config_fund=false
+            export npm_config_audit=false
+            export npm_config_ignore_scripts=true
 
             ${pkgs.rsync}/bin/rsync -a --delete \
               --exclude .git \
@@ -92,7 +96,75 @@ in
               --exclude voices \
               ${sourceRoot}/ ${appRoot}/
 
-            ${bunPkg}/bin/bun install --frozen-lockfile
+            cat > ${appRoot}/packages/server/main.py <<'EOF'
+            import io
+            import os
+
+            import soundfile as sf
+            import speaker
+            import torch
+            from fastapi import FastAPI, HTTPException, Response
+            from omnivoice import OmniVoice
+            from pydantic import BaseModel
+
+
+            class GenerateParams(BaseModel):
+                text: str
+                speaker: str
+
+
+            def resolve_dtype(dtype_name: str) -> torch.dtype:
+                dtype_map = {
+                    "bfloat16": torch.bfloat16,
+                    "float16": torch.float16,
+                    "float32": torch.float32,
+                }
+
+                if dtype_name not in dtype_map:
+                    raise ValueError(f"Unsupported OMNITTS_DTYPE: {dtype_name}")
+
+                return dtype_map[dtype_name]
+
+
+            model = OmniVoice.from_pretrained(
+                "k2-fsa/OmniVoice",
+                device_map=os.environ.get("OMNITTS_DEVICE", "cpu"),
+                dtype=resolve_dtype(os.environ.get("OMNITTS_DTYPE", "float32")),
+            )
+
+            transcript = {item.id: item.transcript for item in speaker.get_transcript()}
+
+            app = FastAPI()
+
+
+            @app.get("/")
+            def read_root():
+                return {"message": "Hello, World!"}
+
+
+            @app.post("/generate")
+            def generate_voice(params: GenerateParams):
+                if not speaker.is_speaker_available(params.speaker):
+                    raise HTTPException(404, "Selected speaker is not found")
+                audio = model.generate(
+                    text=params.text,
+                    ref_audio=f"{speaker.BASE_PATH}/{params.speaker}.wav",
+                    ref_text=transcript.get(params.speaker),
+                    language_id=262,
+                )
+
+                buf = io.BytesIO()
+                sf.write(buf, audio[0], 24000, format="WAV")
+                return Response(content=buf.getvalue(), media_type="audio/wav")
+
+
+            @app.get("/speaker_list", response_model=list[str])
+            def get_speaker_list():
+                return list(transcript)
+            EOF
+
+            ${nodePkg}/bin/npm install --omit=dev
+            ${nodePkg}/bin/npm install --no-save tsx
             ${pkgs.uv}/bin/uv sync --python ${pkgs.python314}/bin/python --frozen --no-dev
           '';
         };
@@ -137,10 +209,10 @@ in
             WorkingDirectory = "${appRoot}/packages/bot";
             Environment = [
               "HOME=${stateDir}"
-              "BUN_INSTALL_CACHE_DIR=${cacheDir}/bun"
+              "NODE_ENV=production"
             ];
             EnvironmentFile = "/run/secrets/${appName}.env";
-            ExecStart = "${bunPkg}/bin/bun --env-file=/run/secrets/${appName}.env index.ts";
+            ExecStart = "${appRoot}/node_modules/.bin/tsx ${appRoot}/packages/bot/index.ts";
             Restart = "on-failure";
             RestartSec = "5s";
           };
