@@ -1,6 +1,7 @@
-{ pkgs, ... }:
+{ pkgs, pkgs-unstable, ... }:
 let
   appName = "omni-tts-discord";
+  bunPkg = pkgs-unstable.bun;
   appSource = pkgs.fetchFromGitHub {
     owner = "akazdayo";
     repo = "omni-tts-discord";
@@ -12,7 +13,6 @@ let
   stateDir = "/var/lib/${appName}";
   appRoot = "${stateDir}/app";
   cacheDir = "${stateDir}/cache";
-  npmCacheDir = "${cacheDir}/npm";
   voiceDataDir = "${stateDir}/voices";
   containerIp = "192.168.11.64";
 in
@@ -60,7 +60,7 @@ in
           "d ${stateDir} 0750 root root -"
           "d ${appRoot} 0750 root root -"
           "d ${cacheDir} 0750 root root -"
-          "d ${npmCacheDir} 0750 root root -"
+          "d ${cacheDir}/bun 0750 root root -"
           "d ${cacheDir}/uv 0750 root root -"
         ];
 
@@ -81,7 +81,7 @@ in
           };
           script = ''
             export HOME=${stateDir}
-            export npm_config_cache=${npmCacheDir}
+            export BUN_INSTALL_CACHE_DIR=${cacheDir}/bun
             export UV_CACHE_DIR=${cacheDir}/uv
 
             ${pkgs.rsync}/bin/rsync -a --delete \
@@ -92,11 +92,7 @@ in
               --exclude voices \
               ${sourceRoot}/ ${appRoot}/
 
-            cd ${appRoot}
-            ${pkgs.nodejs_24}/bin/npm install
-            cd ${appRoot}/packages/message_queue
-            ${pkgs.gleam}/bin/gleam build --target javascript
-            cd ${appRoot}
+            ${bunPkg}/bin/bun install --frozen-lockfile
             ${pkgs.uv}/bin/uv sync --python ${pkgs.python314}/bin/python --frozen --no-dev
           '';
         };
@@ -141,13 +137,10 @@ in
             WorkingDirectory = "${appRoot}/packages/bot";
             Environment = [
               "HOME=${stateDir}"
-              "PATH=${appRoot}/node_modules/.bin:${pkgs.lib.makeBinPath [
-                pkgs.nodejs_24
-                pkgs.nodePackages.tsx
-              ]}"
+              "BUN_INSTALL_CACHE_DIR=${cacheDir}/bun"
             ];
             EnvironmentFile = "/run/secrets/${appName}.env";
-            ExecStart = "${pkgs.nodePackages.tsx}/bin/tsx index.ts";
+            ExecStart = "${bunPkg}/bin/bun --env-file=/run/secrets/${appName}.env index.ts";
             Restart = "on-failure";
             RestartSec = "5s";
           };
