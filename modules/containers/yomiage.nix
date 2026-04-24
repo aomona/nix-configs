@@ -163,8 +163,12 @@ in
                 return list(transcript)
             EOF
 
+            find ${appRoot}/packages/bot -name '*.ts' -exec ${pkgs.perl}/bin/perl -0pi -e '
+              s#from "((?:\./|\.\./)[^"]+?)\.js"#from "$1.ts"#g;
+              s#from "((?:\./|\.\./)(?![^"]+\.[^"/]+")[^"]+)"#from "$1.ts"#g;
+            ' {} +
+
             ${nodePkg}/bin/npm install --omit=dev
-            ${nodePkg}/bin/npm install --no-save tsx
             ${pkgs.uv}/bin/uv sync --python ${pkgs.python314}/bin/python --frozen --no-dev
           '';
         };
@@ -212,7 +216,7 @@ in
               "NODE_ENV=production"
             ];
             EnvironmentFile = "/run/secrets/${appName}.env";
-            ExecStart = "${appRoot}/node_modules/.bin/tsx ${appRoot}/packages/bot/index.ts";
+            ExecStart = "${nodePkg}/bin/node --experimental-strip-types ${appRoot}/packages/bot/index.ts";
             Restart = "on-failure";
             RestartSec = "5s";
           };
