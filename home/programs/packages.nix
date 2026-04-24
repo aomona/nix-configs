@@ -19,7 +19,6 @@
       gimp
       godot_4
       comma
-      creator-companion-tui
       vpm-cli
       devenv
       vim
