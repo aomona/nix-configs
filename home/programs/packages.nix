@@ -96,5 +96,6 @@
       wayvr
       wireguard-tools
       bs-manager
+      spotify
     ]);
 }
