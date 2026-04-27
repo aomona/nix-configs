@@ -8,6 +8,10 @@
       url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-darwin = {
+      url = "github:nix-darwin/nix-darwin/nix-darwin-25.11";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nixvim = {
       url = "github:nix-community/nixvim/nixos-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -38,6 +42,7 @@
       nixpkgs,
       nixpkgs-unstable,
       home-manager,
+      nix-darwin,
       nixvim,
       lanzaboote,
       nix-flatpak,
@@ -72,8 +77,7 @@
           flakeRoot ? null,
         }:
         let
-          resolvedFlakeRoot =
-            if flakeRoot == null then "/home/${primaryUser}/configs" else flakeRoot;
+          resolvedFlakeRoot = if flakeRoot == null then "/home/${primaryUser}/configs" else flakeRoot;
           hostMeta = {
             inherit hostName system primaryUser;
             flakeRoot = resolvedFlakeRoot;
@@ -84,7 +88,12 @@
         lib.nixosSystem {
           inherit system;
           specialArgs = {
-            inherit self inputs pkgs-unstable hostMeta;
+            inherit
+              self
+              inputs
+              pkgs-unstable
+              hostMeta
+              ;
           };
           modules = [
             ./packages
@@ -97,7 +106,12 @@
               home-manager.useUserPackages = true;
               home-manager.users.${primaryUser} = import ./home;
               home-manager.extraSpecialArgs = {
-                inherit pkgs-unstable pkgs-with-llm-agents inputs hostMeta;
+                inherit
+                  pkgs-unstable
+                  pkgs-with-llm-agents
+                  inputs
+                  hostMeta
+                  ;
                 nixvim-module = nixvim.homeModules.nixvim;
               };
             }
@@ -112,8 +126,7 @@
           flakeRoot ? null,
         }:
         let
-          resolvedFlakeRoot =
-            if flakeRoot == null then "/home/${primaryUser}/configs" else flakeRoot;
+          resolvedFlakeRoot = if flakeRoot == null then "/home/${primaryUser}/configs" else flakeRoot;
           hostMeta = {
             inherit hostName system primaryUser;
             flakeRoot = resolvedFlakeRoot;
@@ -124,7 +137,12 @@
         lib.nixosSystem {
           inherit system;
           specialArgs = {
-            inherit self inputs pkgs-unstable hostMeta;
+            inherit
+              self
+              inputs
+              pkgs-unstable
+              hostMeta
+              ;
           };
           modules = [
             ./packages
@@ -136,7 +154,59 @@
               home-manager.useUserPackages = true;
               home-manager.users.${primaryUser} = import ./home/server.nix;
               home-manager.extraSpecialArgs = {
-                inherit pkgs-unstable pkgs-with-llm-agents inputs hostMeta;
+                inherit
+                  pkgs-unstable
+                  pkgs-with-llm-agents
+                  inputs
+                  hostMeta
+                  ;
+                nixvim-module = nixvim.homeModules.nixvim;
+              };
+            }
+          ];
+        };
+
+      mkDarwinHost =
+        hostName:
+        {
+          system ? "aarch64-darwin",
+          primaryUser ? defaultPrimaryUser,
+          flakeRoot ? null,
+        }:
+        let
+          resolvedFlakeRoot = if flakeRoot == null then "/Users/${primaryUser}/configs" else flakeRoot;
+          hostMeta = {
+            inherit hostName system primaryUser;
+            flakeRoot = resolvedFlakeRoot;
+          };
+          pkgs-unstable = mkPkgsUnstable system;
+          pkgs-with-llm-agents = mkPkgsWithLlmAgents system;
+        in
+        nix-darwin.lib.darwinSystem {
+          inherit system;
+          specialArgs = {
+            inherit
+              self
+              inputs
+              pkgs-unstable
+              hostMeta
+              ;
+          };
+          modules = [
+            ./packages
+            (./hosts + "/${hostName}")
+            home-manager.darwinModules.home-manager
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.users.${primaryUser} = import ./home/darwin.nix;
+              home-manager.extraSpecialArgs = {
+                inherit
+                  pkgs-unstable
+                  pkgs-with-llm-agents
+                  inputs
+                  hostMeta
+                  ;
                 nixvim-module = nixvim.homeModules.nixvim;
               };
             }
@@ -150,10 +220,14 @@
       servers = {
         server = { };
       };
+
+      darwinHosts = {
+        macbook = { };
+      };
     in
     {
-      nixosConfigurations =
-        (lib.mapAttrs mkHost hosts) //
-        (lib.mapAttrs mkServer servers);
+      nixosConfigurations = (lib.mapAttrs mkHost hosts) // (lib.mapAttrs mkServer servers);
+
+      darwinConfigurations = lib.mapAttrs mkDarwinHost darwinHosts;
     };
 }
