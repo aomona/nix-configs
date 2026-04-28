@@ -21,7 +21,6 @@
       btop
 
       # Network tools
-      tailscale
       wireguard-tools
 
       # Fonts

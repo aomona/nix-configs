@@ -1,4 +1,20 @@
-{hostMeta, ...}: {
+{ hostMeta, ... }:
+{
+  imports = [
+    ../../modules/boot/darwin.nix
+    ../../modules/system/darwin.nix
+    ../../modules/networking/darwin.nix
+    ../../modules/locale/darwin.nix
+    ../../modules/desktop/darwin.nix
+    ../../modules/hardware/darwin.nix
+    ../../modules/audio/darwin.nix
+    ../../modules/users/darwin.nix
+    ../../modules/gaming/darwin.nix
+    ../../modules/virtualization/darwin.nix
+    ../../modules/flatpak/darwin.nix
+    ../../modules/containers/darwin.nix
+  ];
+
   nix.settings.experimental-features = [
     "nix-command"
     "flakes"
