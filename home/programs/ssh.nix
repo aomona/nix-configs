@@ -11,9 +11,6 @@
         user = "git";
         identityFile = "~/.ssh/id_ed25519_sk_rk";
         identitiesOnly = true;
-        extraOptions = {
-          SecurityKeyProvider = "internal";
-        };
       };
     };
   };
