@@ -10,8 +10,13 @@
     };
 
     taps = [ ];
-    brews = [ ];
-    casks = [ ];
+    brews = [ "openssh" "libfido2" ];
+    casks = [ 
+      "vesktop"
+      "orbstack"
+      "spotify"
+      "ghostty"
+    ];
     masApps = { };
   };
 }

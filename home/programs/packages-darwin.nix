@@ -23,6 +23,12 @@
       # Network tools
       tailscale
       wireguard-tools
+
+      # Fonts
+      nerd-fonts.fira-code
+      pnpm
+      bun
+      nodejs_24
     ])
     ++ (with pkgs-with-llm-agents.llm-agents; [
       opencode

@@ -1,5 +1,4 @@
-{ hostMeta, ... }:
-{
+{hostMeta, ...}: {
   nix.settings.experimental-features = [
     "nix-command"
     "flakes"
@@ -14,6 +13,10 @@
 
   nixpkgs.config.allowUnfree = true;
   nixpkgs.hostPlatform = hostMeta.system;
+
+  environment.systemPath = [
+    "/opt/homebrew/bin"
+  ];
 
   system.primaryUser = hostMeta.primaryUser;
   system.stateVersion = 6;

@@ -8,6 +8,16 @@
       ${builtins.readFile ../../dotfiles/config.nu}
     '';
     extraEnv = ''
+      ${
+        if pkgs.stdenv.isDarwin then
+          ''
+            if ("/opt/homebrew/bin" | path exists) {
+              $env.PATH = ($env.PATH | prepend "/opt/homebrew/bin")
+            }
+          ''
+        else
+          ""
+      }
       ${builtins.readFile ../../dotfiles/env.nu}
     '';
   };
