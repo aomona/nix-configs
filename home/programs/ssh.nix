@@ -1,4 +1,4 @@
-{...}: {
+{pkgs, lib, ...}: {
   programs.ssh = {
     enable = true;
     matchBlocks = {
@@ -11,6 +11,10 @@
         user = "git";
         identityFile = "~/.ssh/id_ed25519_sk_rk";
         identitiesOnly = true;
+      };
+    } // lib.optionalAttrs pkgs.stdenv.isDarwin {
+      "*" = {
+        identityFile = "~/.ssh/id_ed25519_sk_rk";
       };
     };
   };
