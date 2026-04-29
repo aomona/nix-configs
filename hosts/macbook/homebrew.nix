@@ -16,6 +16,7 @@
       "orbstack"
       "spotify"
       "ghostty"
+      "loop"
     ];
     masApps = { };
   };
