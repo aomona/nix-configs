@@ -11,7 +11,6 @@
       nixfmt
 
       # Shell utilities
-      starship
       fastfetch
       tree
       jq

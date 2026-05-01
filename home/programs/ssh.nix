@@ -13,7 +13,7 @@
         identitiesOnly = true;
       };
     } // lib.optionalAttrs pkgs.stdenv.isDarwin {
-      "*" = {
+      "*" = lib.hm.dag.entryAfter [ "github.com" ] {
         identityFile = "~/.ssh/id_ed25519_sk_rk";
       };
     };

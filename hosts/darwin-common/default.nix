@@ -15,10 +15,6 @@
     ../../modules/containers/darwin.nix
   ];
 
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
-  ];
   nix.settings.always-allow-substitutes = true;
   nix.settings.extra-trusted-substituters = [
     "https://cache.lix.systems"
@@ -27,7 +23,6 @@
     "cache.lix.systems:aBnZUw8zA7H35Cz2RyKFVs3H4PlGTLawyY5KRbvJR8o="
   ];
 
-  nixpkgs.config.allowUnfree = true;
   nixpkgs.hostPlatform = hostMeta.system;
 
   environment.systemPath = [
