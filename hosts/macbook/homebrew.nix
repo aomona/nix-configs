@@ -10,13 +10,15 @@
     };
 
     taps = [ ];
-    brews = [ "openssh" "libfido2" ];
+    brews = [ "openssh" "libfido2" "ykman" "opensc"];
     casks = [ 
       "vesktop"
       "orbstack"
       "spotify"
       "ghostty"
       "loop"
+      "yubico-authenticator"
+      "helium-browser"
     ];
     masApps = { };
   };
