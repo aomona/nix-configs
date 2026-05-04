@@ -51,6 +51,7 @@ in
           settings = {
             dns = {
               upstreams = [ "127.0.0.1#5335" ];
+              hosts = [ "192.168.11.63 nas.home.arpa" ];
               dnssec = true;
               bogusPriv = true;
               domainNeeded = true;
