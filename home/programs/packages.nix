@@ -97,5 +97,6 @@
       wireguard-tools
       bs-manager
       spotify
+      tetrio-desktop
     ]);
 }
