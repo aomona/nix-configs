@@ -38,6 +38,8 @@
       url = "github:akazdayo/minecraft-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
   };
 
   outputs =
@@ -54,6 +56,7 @@
       noctalia,
       llm-agents,
       minecraft-nix,
+      nix-cachyos-kernel,
     }@inputs:
     let
       lib = nixpkgs.lib;

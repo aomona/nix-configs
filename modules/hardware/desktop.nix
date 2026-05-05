@@ -1,6 +1,7 @@
 { ... }:
 {
   imports = [
+    ./cachyos-kernel.nix
     ./nvidia.nix
     ./swap.nix
     ./pentablet.nix
