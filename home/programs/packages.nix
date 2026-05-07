@@ -75,7 +75,7 @@
       gh
       unityhub
       nvtopPackages.nvidia
-      protonup-qt
+
       kdePackages.dolphin
       immich-go
       zoom-us
