@@ -1,9 +1,9 @@
 { ... }:
 {
   imports = [
-    ./adguard-home.nix
     ./immich.nix
     ./nextcloud.nix
+    ./pihole-unbound.nix
   ];
 
   virtualisation.oci-containers.backend = "docker";

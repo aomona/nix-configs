@@ -20,6 +20,10 @@
       url = "github:nix-community/lanzaboote";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    deploy-rs = {
+      url = "github:serokell/deploy-rs";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
 
     # QuickShell
@@ -34,6 +38,13 @@
       url = "github:akazdayo/minecraft-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    nix-cachyos-kernel.url = "github:xddxdd/nix-cachyos-kernel/release";
+
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -45,10 +56,13 @@
       nix-darwin,
       nixvim,
       lanzaboote,
+      deploy-rs,
       nix-flatpak,
       noctalia,
       llm-agents,
       minecraft-nix,
+      nix-cachyos-kernel,
+      sops-nix,
     }@inputs:
     let
       lib = nixpkgs.lib;
@@ -75,6 +89,7 @@
           system ? "x86_64-linux",
           primaryUser ? defaultPrimaryUser,
           flakeRoot ? null,
+          ...
         }:
         let
           resolvedFlakeRoot = if flakeRoot == null then "/home/${primaryUser}/configs" else flakeRoot;
@@ -99,6 +114,7 @@
             ./packages
             (./hosts + "/${hostName}")
             lanzaboote.nixosModules.lanzaboote
+            sops-nix.nixosModules.default
             home-manager.nixosModules.home-manager
             nix-flatpak.nixosModules.nix-flatpak
             {
@@ -107,6 +123,7 @@
               home-manager.users.${primaryUser} = import ./home;
               home-manager.extraSpecialArgs = {
                 inherit
+                  self
                   pkgs-unstable
                   pkgs-with-llm-agents
                   inputs
@@ -124,6 +141,7 @@
           system ? "x86_64-linux",
           primaryUser ? defaultPrimaryUser,
           flakeRoot ? null,
+          ...
         }:
         let
           resolvedFlakeRoot = if flakeRoot == null then "/home/${primaryUser}/configs" else flakeRoot;
@@ -148,6 +166,7 @@
             ./packages
             (./hosts + "/${hostName}")
             lanzaboote.nixosModules.lanzaboote
+            sops-nix.nixosModules.default
             home-manager.nixosModules.home-manager
             {
               home-manager.useGlobalPkgs = true;
@@ -155,6 +174,7 @@
               home-manager.users.${primaryUser} = import ./home/server.nix;
               home-manager.extraSpecialArgs = {
                 inherit
+                  self
                   pkgs-unstable
                   pkgs-with-llm-agents
                   inputs
@@ -202,6 +222,7 @@
               home-manager.users.${primaryUser} = import ./home/darwin.nix;
               home-manager.extraSpecialArgs = {
                 inherit
+                  self
                   pkgs-unstable
                   pkgs-with-llm-agents
                   inputs
@@ -214,20 +235,75 @@
         };
 
       hosts = {
-        nixos = { };
+        nixos = {
+          deployHostname = "192.168.11.48";
+        };
       };
 
       servers = {
-        server = { };
+        server = {
+          deployHostname = "192.168.11.50";
+        };
       };
 
       darwinHosts = {
         macbook = { };
       };
+      forAllSystems = lib.genAttrs [
+        "x86_64-linux"
+        "aarch64-linux"
+        "aarch64-darwin"
+      ];
+
+      mkDeployNode =
+        hostName:
+        {
+          deployHostname ? hostName,
+          system ? "x86_64-linux",
+          ...
+        }:
+        {
+          hostname = deployHostname;
+          sshOpts = [
+            "-i"
+            "~/.ssh/id_ed25519_sk_rk"
+          ];
+          profiles.system = {
+            sshUser = defaultPrimaryUser;
+            user = "root";
+            path = deploy-rs.lib.${system}.activate.nixos self.nixosConfigurations.${hostName};
+          };
+        };
     in
     {
       nixosConfigurations = (lib.mapAttrs mkHost hosts) // (lib.mapAttrs mkServer servers);
 
       darwinConfigurations = lib.mapAttrs mkDarwinHost darwinHosts;
+
+      deploy.nodes = lib.mapAttrs mkDeployNode (hosts // servers);
+
+      checks = lib.mapAttrs (system: deployLib: deployLib.deployChecks self.deploy) deploy-rs.lib;
+
+    devShells = forAllSystems (
+      system:
+      let
+        pkgs = import nixpkgs {
+          inherit system;
+          config.allowUnfree = true;
+        };
+      in
+      {
+        default = pkgs.mkShell {
+          packages = [
+            deploy-rs.packages.${system}.default
+            pkgs.nixfmt-rfc-style
+            pkgs.sops
+            pkgs.age
+            pkgs.age-plugin-yubikey
+            pkgs.ssh-to-age
+          ];
+        };
+      }
+    );
     };
 }

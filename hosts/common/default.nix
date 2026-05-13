@@ -12,6 +12,7 @@
     ../../modules/gaming/desktop.nix
     ../../modules/virtualization/desktop.nix
     ../../modules/flatpak/desktop.nix
+    ../../modules/secrets/desktop.nix
   ];
 
   system.stateVersion = "25.11";

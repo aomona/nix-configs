@@ -6,7 +6,7 @@
   ];
 
   networking.hostName = hostMeta.hostName;
-  networking.nameservers = [ "1.1.1.1" ];
+  networking.nameservers = [ "192.168.11.62" ];
   networking.networkmanager.enable = true;
   networking.networkmanager.unmanaged = [ "eno1" ];
 

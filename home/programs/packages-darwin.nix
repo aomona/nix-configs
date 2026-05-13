@@ -27,6 +27,7 @@
       pnpm
       bun
       nodejs_24
+      ffmpeg
     ])
     ++ (with pkgs-with-llm-agents.llm-agents; [
       opencode

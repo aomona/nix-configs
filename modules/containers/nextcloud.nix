@@ -35,6 +35,7 @@
             adminpassFile = "/run/secrets/nextcloud-adminpass";
             dbtype = "pgsql";
           };
+          settings.trusted_domains = [ "nas.home.arpa" ];
           database.createLocally = true;
         };
 

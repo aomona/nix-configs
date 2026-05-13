@@ -10,6 +10,7 @@
     ../../modules/containers/server.nix
     ../../modules/gaming/minecraft-server.nix
     ../../modules/bitcoin
+    ../../modules/secrets/server.nix
     ./hardware-configuration.nix
   ];
 

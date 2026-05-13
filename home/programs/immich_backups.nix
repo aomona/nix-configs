@@ -16,7 +16,7 @@ let
     set -euo pipefail
 
     server="http://192.168.11.61:2283"
-    api_key="yeJs9lyGhfwyjeNaAiff9ClCy0miu477n9d5ZraIs7I"
+    api_key="$(cat /run/secrets/immich-api-key)"
 
     for entry in "${immichBackups}"/*; do
       if [ ! -e "$entry" ]; then

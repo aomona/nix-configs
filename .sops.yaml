@@ -1,0 +1,28 @@
+keys:
+  # Host SSH-derived age recipients (fallback for unattended boot)
+  # Generate: ssh-to-age -i /etc/ssh/ssh_host_ed25519_key.pub
+  - &nixos_host age17ruhp8fp4cnhpg8phtcsyf2s37ejt5qekpqkntx6f8j22uu9sg6s53ngxm
+  - &server_host age1dmadrw5y7z68h0atxjvuwk2wuxs9rdmd03dhkm92ex579q4aqs5sv4xgu3
+
+creation_rules:
+  - path_regex: secrets/nixos/[^/]+\.(yaml|json|env|ini)$
+    key_groups:
+      - age:
+          - *nixos_host
+
+  - path_regex: secrets/server/[^/]+\.(yaml|json|env|ini)$
+    key_groups:
+      - age:
+          - *server_host
+
+  - path_regex: secrets/common/[^/]+\.(yaml|json|env|ini)$
+    key_groups:
+      - age:
+          - *nixos_host
+          - *server_host
+
+  # Darwin/macbook home-manager secrets
+  - path_regex: secrets/darwin/[^/]+\.(yaml|json|env|ini)$
+    key_groups:
+      - age:
+          - *nixos_host
