@@ -19,6 +19,7 @@
       "loop"
       "yubico-authenticator"
       "helium-browser"
+      "obsidian"
     ];
     masApps = { };
   };
