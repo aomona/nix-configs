@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, lib, ... }:
 
 {
   # NixOS container running Bitcoin Core pruned node
@@ -29,10 +29,11 @@
   # Tor proxy and hidden service for external P2P exposure
   services.tor = {
     enable = true;
+    client.enable = true;
     settings = {
-      SocksPort = [
-        "127.0.0.1:9050"
-        "192.168.100.10:9050"
+      SOCKSPort = lib.mkForce [
+        { addr = "127.0.0.1"; port = 9050; }
+        { addr = "192.168.100.10"; port = 9050; }
       ];
     };
     relay.onionServices."bitcoin-node" = {
