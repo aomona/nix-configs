@@ -9,6 +9,7 @@
     ../../modules/virtualization/server.nix
     ../../modules/containers/server.nix
     ../../modules/gaming/minecraft-server.nix
+    ../../modules/bitcoin
     ./hardware-configuration.nix
   ];
 
