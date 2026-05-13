@@ -15,5 +15,13 @@
       generateKey = false;
       plugins = with pkgs; [ age-plugin-yubikey ];
     };
+
+    secrets.tor-bitcoin-node-key = {
+      format = "binary";
+      sopsFile = ../../secrets/server/tor-bitcoin-node-key;
+      owner = "tor";
+      group = "tor";
+      mode = "0400";
+    };
   };
 }

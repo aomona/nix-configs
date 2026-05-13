@@ -21,6 +21,12 @@ creation_rules:
           - *nixos_host
           - *server_host
 
+  # Server binary secrets (Tor keys, etc.)
+  - path_regex: secrets/server/[^/]+$
+    key_groups:
+      - age:
+          - *server_host
+
   # Darwin/macbook home-manager secrets
   - path_regex: secrets/darwin/[^/]+\.(yaml|json|env|ini)$
     key_groups:

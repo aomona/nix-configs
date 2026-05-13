@@ -1,4 +1,4 @@
-{ ... }:
+{ config, ... }:
 
 {
   # NixOS container running Bitcoin Core pruned node
@@ -34,13 +34,17 @@
         "127.0.0.1:9050"
         "192.168.100.10:9050"
       ];
-      HiddenServiceDir = "/var/lib/tor/bitcoin-node";
-      HiddenServicePort = "8333 192.168.100.11:8333";
+    };
+    relay.onionServices."bitcoin-node" = {
+      version = 3;
+      #secretKey = config.sops.secrets.tor-bitcoin-node-key.path;
+      map = [{
+        port = 8333;
+        target = {
+          addr = "192.168.100.11";
+          port = 8333;
+        };
+      }];
     };
   };
-
-  # Ensure hidden service directory exists with correct permissions
-  systemd.tmpfiles.rules = [
-    "d /var/lib/tor/bitcoin-node 0700 tor tor -"
-  ];
 }
