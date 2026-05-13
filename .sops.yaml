@@ -1,31 +1,23 @@
 keys:
-  # YubiKey age recipient (replace with your actual key)
-  # Generate: age-plugin-yubikey --generate --slot 1 --touch-policy always --name "primary"
-  # List:     age-plugin-yubikey --list-all
-  - &admin_yubikey age1replace-with-your-yubikey-recipient
-
   # Host SSH-derived age recipients (fallback for unattended boot)
   # Generate: ssh-to-age -i /etc/ssh/ssh_host_ed25519_key.pub
-  - &nixos_host age1replace-with-nixos-host-recipient
-  - &server_host age1replace-with-server-host-recipient
+  - &nixos_host age17ruhp8fp4cnhpg8phtcsyf2s37ejt5qekpqkntx6f8j22uu9sg6s53ngxm
+  - &server_host age1dmadrw5y7z68h0atxjvuwk2wuxs9rdmd03dhkm92ex579q4aqs5sv4xgu3
 
 creation_rules:
   - path_regex: secrets/nixos/[^/]+\.(yaml|json|env|ini)$
     key_groups:
       - age:
-          - *admin_yubikey
           - *nixos_host
 
   - path_regex: secrets/server/[^/]+\.(yaml|json|env|ini)$
     key_groups:
       - age:
-          - *admin_yubikey
           - *server_host
 
   - path_regex: secrets/common/[^/]+\.(yaml|json|env|ini)$
     key_groups:
       - age:
-          - *admin_yubikey
           - *nixos_host
           - *server_host
 
@@ -33,4 +25,4 @@ creation_rules:
   - path_regex: secrets/darwin/[^/]+\.(yaml|json|env|ini)$
     key_groups:
       - age:
-          - *admin_yubikey
+          - *nixos_host

@@ -2,7 +2,7 @@
 {
   sops = {
     age = {
-      keyFile = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
+      sshKeyPaths = [ "${config.home.homeDirectory}/.ssh/id_ed25519" ];
       generateKey = false;
       plugins = with pkgs; [ age-plugin-yubikey ];
     };

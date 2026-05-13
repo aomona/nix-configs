@@ -28,22 +28,19 @@ ssh-to-age -i /etc/ssh/ssh_host_ed25519_key.pub
 
 Replace the placeholders in `.sops.yaml` with the actual values.
 
-### 4. Save YubiKey identity
+### 4. Host SSH key setup
+
+This configuration uses SSH host keys for secret decryption (no YubiKey required for unattended boot).
+
+On each host, the SSH host public key is converted to an age recipient:
 
 ```bash
-mkdir -p ~/.config/sops/age
-age-plugin-yubikey --identity >> ~/.config/sops/age/keys.txt
-chmod 600 ~/.config/sops/age/keys.txt
+ssh-to-age -i /etc/ssh/ssh_host_ed25519_key.pub
 ```
 
-The system-level sops config looks for identities at `/var/lib/sops/keys.txt`. Copy your YubiKey identity there so system services can decrypt secrets:
+Add this output to `.sops.yaml` under the appropriate host key.
 
-```bash
-sudo mkdir -p /var/lib/sops
-sudo install -m 600 -o root -g root ~/.config/sops/age/keys.txt /var/lib/sops/keys.txt
-```
-
-As a fallback, system secrets can also decrypt using the host's SSH key (configured via `sops.age.sshKeyPaths`).
+No private key files need to be copied - sops-install-secrets reads `/etc/ssh/ssh_host_ed25519_key` directly.
 
 ### 5. Create encrypted secrets
 
@@ -70,20 +67,18 @@ Encrypted secret files must be tracked by git so they are included in the nix st
 
 ## Replacing the Dummy Secret
 
-`secrets/nixos/home.yaml` currently contains a dummy `immich-api-key` encrypted to a temporary age key. You cannot edit it directly because you do not have the decryption key.
-
-After setting up your YubiKey and updating `.sops.yaml`, recreate the file with your real secret:
+`secrets/nixos/home.yaml` currently contains a dummy `immich-api-key` encrypted to the nixos host SSH key. Recreate it with your real secret:
 
 ```bash
 rm secrets/nixos/home.yaml
 sops secrets/nixos/home.yaml
 # Add: immich-api-key: your-real-api-key
-# Save and exit - sops will encrypt with your recipients
+# Save and exit - sops will encrypt with the host SSH key
 ```
 
-### Security Note on Host SSH Recipients
+### Security Note
 
-The `.sops.yaml` includes host SSH-derived age recipients as a fallback. This enables unattended system boot without requiring a YubiKey touch, but anyone with access to the host's SSH private key (`/etc/ssh/ssh_host_ed25519_key`) can decrypt those secrets. For maximum security, remove host SSH recipients from `.sops.yaml` after confirming YubiKey-only decryption works reliably on your setup.
+This configuration uses SSH host keys for decryption. Anyone with root access to the host (who can read `/etc/ssh/ssh_host_ed25519_key`) can decrypt these secrets. This is a trade-off for unattended boot support.
 
 ## Adding a New Secret
 
