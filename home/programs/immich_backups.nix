@@ -1,7 +1,8 @@
-{ pkgs, ... }:
+{ pkgs, hostMeta, ... }:
 let
-  linuxVRChatFolder = "/home/akazdayo/.local/share/Steam/steamapps/compatdata/438100/pfx/drive_c/users/steamuser/Pictures/VRChat";
-  windowsVRChatFolder = "/mnt/windows/Users/keenb/OneDrive/画像/VRChat";
+  immichBackupData = hostMeta.hostData.immichBackups;
+  linuxVRChatFolder = immichBackupData.linuxVRChatFolder;
+  windowsVRChatFolder = immichBackupData.windowsVRChatFolder;
   immichBackups = pkgs.linkFarm "immichBackups" [
     {
       name = "linuxVRChatFolder";
@@ -15,7 +16,7 @@ let
   immichBackup = pkgs.writeShellScriptBin "immich-backup" ''
     set -euo pipefail
 
-    server="http://192.168.11.61:2283"
+    server="${immichBackupData.server}"
     api_key="$(cat /run/secrets/immich-api-key)"
 
     for entry in "${immichBackups}"/*; do

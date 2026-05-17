@@ -1,4 +1,4 @@
-{ config, pkgs, self, ... }:
+{ config, pkgs, ... }:
 {
   sops = {
     age = {
@@ -7,10 +7,11 @@
       plugins = with pkgs; [ age-plugin-yubikey ];
     };
 
-    # Add secrets here after creating the encrypted file.
+    # Home Manager imports this module on desktop/server/darwin, but there are
+    # no active HM-managed secrets yet. Keep examples aligned to current paths.
     # Example:
     # secrets.immich-api-key = {
-    #   sopsFile = "${self}/secrets/nixos/home.yaml";
+    #   sopsFile = ../../secrets/nixos/home.yaml;
     #   path = "%r/immich-api-key";
     # };
   };

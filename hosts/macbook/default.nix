@@ -1,7 +1,8 @@
 { ... }:
 {
   imports = [
-    ../darwin-common
+    ../../profiles/darwin/desktop.nix
     ./homebrew.nix
+    ./host-data.nix
   ];
 }

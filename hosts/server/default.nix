@@ -1,17 +1,8 @@
 { ... }:
 {
   imports = [
-    ../../modules/boot/server.nix
-    ../../modules/system/server.nix
-    ../../modules/networking/server.nix
-    ../../modules/locale/server.nix
-    ../../modules/users/server.nix
-    ../../modules/virtualization/server.nix
-    ../../modules/containers/server.nix
-    ../../modules/gaming/minecraft-server.nix
-    ../../modules/secrets/server.nix
+    ../../profiles/nixos/server.nix
     ./hardware-configuration.nix
+    ./host-data.nix
   ];
-
-  system.stateVersion = "25.11";
 }
