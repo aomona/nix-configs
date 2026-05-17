@@ -1,0 +1,4 @@
+{ ... }:
+{
+  # Placeholder profile entry point.
+}

@@ -93,9 +93,15 @@
         }:
         let
           resolvedFlakeRoot = if flakeRoot == null then "/home/${primaryUser}/configs" else flakeRoot;
-          hostMeta = {
+          baseHostMeta = {
             inherit hostName system primaryUser;
             flakeRoot = resolvedFlakeRoot;
+          };
+          hostData =
+            (import (./hosts + "/${hostName}/host-data.nix") { hostMeta = baseHostMeta; })._module.args.hostData
+              or { };
+          hostMeta = baseHostMeta // {
+            inherit hostData;
           };
           pkgs-unstable = mkPkgsUnstable system;
           pkgs-with-llm-agents = mkPkgsWithLlmAgents system;
@@ -120,7 +126,7 @@
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.users.${primaryUser} = import ./home;
+              home-manager.users.${primaryUser} = import ./home/profiles/desktop.nix;
               home-manager.extraSpecialArgs = {
                 inherit
                   self
@@ -145,9 +151,15 @@
         }:
         let
           resolvedFlakeRoot = if flakeRoot == null then "/home/${primaryUser}/configs" else flakeRoot;
-          hostMeta = {
+          baseHostMeta = {
             inherit hostName system primaryUser;
             flakeRoot = resolvedFlakeRoot;
+          };
+          hostData =
+            (import (./hosts + "/${hostName}/host-data.nix") { hostMeta = baseHostMeta; })._module.args.hostData
+              or { };
+          hostMeta = baseHostMeta // {
+            inherit hostData;
           };
           pkgs-unstable = mkPkgsUnstable system;
           pkgs-with-llm-agents = mkPkgsWithLlmAgents system;
@@ -171,7 +183,7 @@
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.users.${primaryUser} = import ./home/server.nix;
+              home-manager.users.${primaryUser} = import ./home/profiles/server.nix;
               home-manager.extraSpecialArgs = {
                 inherit
                   self
@@ -195,9 +207,15 @@
         }:
         let
           resolvedFlakeRoot = if flakeRoot == null then "/Users/${primaryUser}/configs" else flakeRoot;
-          hostMeta = {
+          baseHostMeta = {
             inherit hostName system primaryUser;
             flakeRoot = resolvedFlakeRoot;
+          };
+          hostData =
+            (import (./hosts + "/${hostName}/host-data.nix") { hostMeta = baseHostMeta; })._module.args.hostData
+              or { };
+          hostMeta = baseHostMeta // {
+            inherit hostData;
           };
           pkgs-unstable = mkPkgsUnstable system;
           pkgs-with-llm-agents = mkPkgsWithLlmAgents system;
@@ -219,7 +237,7 @@
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.users.${primaryUser} = import ./home/darwin.nix;
+              home-manager.users.${primaryUser} = import ./home/profiles/darwin.nix;
               home-manager.extraSpecialArgs = {
                 inherit
                   self
@@ -285,26 +303,26 @@
 
       checks = lib.mapAttrs (system: deployLib: deployLib.deployChecks self.deploy) deploy-rs.lib;
 
-    devShells = forAllSystems (
-      system:
-      let
-        pkgs = import nixpkgs {
-          inherit system;
-          config.allowUnfree = true;
-        };
-      in
-      {
-        default = pkgs.mkShell {
-          packages = [
-            deploy-rs.packages.${system}.default
-            pkgs.nixfmt-rfc-style
-            pkgs.sops
-            pkgs.age
-            pkgs.age-plugin-yubikey
-            pkgs.ssh-to-age
-          ];
-        };
-      }
-    );
+      devShells = forAllSystems (
+        system:
+        let
+          pkgs = import nixpkgs {
+            inherit system;
+            config.allowUnfree = true;
+          };
+        in
+        {
+          default = pkgs.mkShell {
+            packages = [
+              deploy-rs.packages.${system}.default
+              pkgs.nixfmt-rfc-style
+              pkgs.sops
+              pkgs.age
+              pkgs.age-plugin-yubikey
+              pkgs.ssh-to-age
+            ];
+          };
+        }
+      );
     };
 }
