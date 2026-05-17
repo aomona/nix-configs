@@ -7,7 +7,7 @@
     ".config/git/ignore".source = ../../dotfiles/gitignore;
     ".config/starship.toml".source = pkgs.fetchurl {
       url = "https://starship.rs/presets/toml/catppuccin-powerline.toml";
-      sha256 = "sha256-z4gMhCgYllOHgYTwn7mIo5WzVQZqt7RsHibmu0D/qC0=";
+      sha256 = "sha256-wjdG5MJJA1rQL0KIbpR2Q+gLrmZDqkFwo7RxO+pf68s=";
     };
   };
 }
