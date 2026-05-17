@@ -10,7 +10,6 @@
           jdk8
         ];
       })
-      vpm-cli
       wlx-overlay-s
       alcom
       osu-lazer-bin
