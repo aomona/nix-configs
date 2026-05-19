@@ -10,6 +10,7 @@ in
 {
   programs.ssh = {
     enable = true;
+    enableDefaultConfig = false;
     matchBlocks =
       (hostData.ssh.matchBlocks or { })
       // {
@@ -19,6 +20,11 @@ in
           identityFile = "~/.ssh/id_ed25519_sk_rk";
           identityAgent = "none";
           identitiesOnly = true;
+        };
+      }
+      // lib.optionalAttrs (!pkgs.stdenv.isDarwin) {
+        "*" = {
+          hostname = "%h";
         };
       }
       // lib.optionalAttrs pkgs.stdenv.isDarwin {
