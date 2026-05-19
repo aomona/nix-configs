@@ -17,7 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       updated: ${{ steps.check-changes.outputs.updated }}
-      commit-sha: ${{ steps.commit.outputs.sha }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -42,18 +41,12 @@ jobs:
             echo "updated=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Commit and push flake.lock
-        id: commit
+      - name: Upload flake.lock
         if: steps.check-changes.outputs.updated == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add flake.lock
-          git commit -m "chore: update flake.lock"
-          git push origin "HEAD:${GITHUB_REF_NAME:-main}"
-          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+        uses: actions/upload-artifact@v4
+        with:
+          name: flake-lock-${{ github.run_id }}
+          path: flake.lock
 
   build:
     needs: update
@@ -76,8 +69,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ needs.update.outputs.commit-sha }}
           fetch-depth: 0
+
+      - name: Download flake.lock
+        uses: actions/download-artifact@v4
+        with:
+          name: flake-lock-${{ github.run_id }}
 
       - name: Install Nix
         uses: cachix/install-nix-action@v31
@@ -111,3 +108,30 @@ jobs:
           else
             echo "Warning: failed to push build result to Attic cache '$ATTIC_CACHE'; continuing because Cachix is the primary cache." >&2
           fi
+
+  commit:
+    needs: build
+    if: always() && needs.build.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Download flake.lock
+        uses: actions/download-artifact@v4
+        with:
+          name: flake-lock-${{ github.run_id }}
+
+      - name: Commit and push flake.lock
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add flake.lock
+          if git diff --quiet --cached; then
+            echo "flake.lock unchanged since checkout; nothing to commit."
+            exit 0
+          fi
+          git commit -m "chore: update flake.lock"
+          git push origin "HEAD:${GITHUB_REF_NAME:-main}"
