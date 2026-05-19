@@ -1,24 +1,41 @@
 # AGENTS.md
 
+**Generated:** 2026-05-19 | **Commit:** 94337f6 | **Branch:** main
+
 ## Build & Test Commands
-- **Apply Config (NixOS)**: `sudo nixos-rebuild switch --flake .#nixos` (replace `nixos` with `server` as needed)
+- **Apply Config (NixOS, preferred)**: `nh os switch` (auto-cleans old generations, 4d/3 gen retention)
+- **Apply Config (NixOS, explicit)**: `sudo nixos-rebuild switch --flake .#nixos` (replace `nixos` with `server` as needed)
 - **Test Config (NixOS)**: `sudo nixos-rebuild test --flake .#nixos`
 - **Dry Run (NixOS)**: `nixos-rebuild dry-build --flake .#nixos`
 - **Apply Config (Darwin)**: `nix run nix-darwin -- switch --flake .#macbook`
-- **Lint/Check**: `nix flake check`
+- **Lint/Check**: `nix flake check` (also runs deploy-rs checks)
+- **Update deps**: `nix flake update` (all) or `nix flake lock --update-input <name>`
+- **Dev shell**: `nix develop` (provides deploy-rs, nixfmt-rfc-style, sops, age tools)
+
+## Architecture
+
+Import chain: `flake.nix` → host (`hosts/<name>/default.nix`) → profile (`profiles/<platform>/<type>.nix`) → module domain (`modules/<platform>/<domain>/<variant>.nix`)
+
+- `flake.nix`: Three builder functions — `mkHost` (desktop NixOS), `mkServer` (server NixOS), `mkDarwinHost` (macOS). Each constructs `hostMeta`, resolves `hostData`, wires `specialArgs` + `extraSpecialArgs`.
+- **hostMeta** (passed to all NixOS + HM modules): `{ hostName, system, primaryUser, flakeRoot, hostData }`. `hostData` is resolved via a two-pass pattern: `baseHostMeta` → import `host-data.nix` → extract `_module.args.hostData` → merge into `hostMeta`.
+- **specialArgs (NixOS)**: `self`, `inputs`, `pkgs-unstable`, `hostMeta`
+- **extraSpecialArgs (home-manager)**: same as system + `pkgs-with-llm-agents` + `nixvim-module`
+- **Flake inputs** (14): nixpkgs (25.11), nixpkgs-unstable, home-manager, nix-darwin, nixvim, lanzaboote, deploy-rs, nix-flatpak, noctalia, llm-agents, minecraft-nix, nix-cachyos-kernel, sops-nix
+- **Outputs**: `nixosConfigurations.{nixos,server}`, `darwinConfigurations.macbook`, `deploy.nodes`, `checks` (deploy-rs), `devShells`
 
 ## Code Style & Conventions
 - **Structure**: Platform-first modular Flake. System settings live under `modules/<platform>/`, user settings under `home/`.
-- **Modules**: Use `default.nix` as directory entry point. Import sub-modules in `default.nix`.
-- **Arguments**: Modules typically accept `{ pkgs, pkgs-unstable, ... }`. Host-aware modules may also receive `hostMeta`.
+- **Modules**: Use `default.nix` as directory entry point for multi-file domains. Import sub-modules in `default.nix`.
+- **NixOS module naming**: Use host-type suffix — `desktop.nix` / `server.nix` per domain (e.g., `boot/desktop.nix`, `boot/server.nix`). Darwin modules use `default.nix` (single variant).
+- **Arguments**: Modules typically accept `{ pkgs, pkgs-unstable, ... }`. Host-aware modules also receive `hostMeta`; access host-specific values via `hostMeta.hostData.<key>` — never hardcode.
+- **Profile registration**: Profiles are pure aggregators (`{ imports = [...]; }`). NixOS desktop profile imports 15 modules; server imports 12.
 - **Registration**:
   - NixOS system modules: imported by `profiles/nixos/*.nix`.
   - Darwin system modules: imported by `profiles/darwin/*.nix`.
-  - Cross-platform modules: imported by `modules/shared/default.nix` (currently a placeholder).
   - Home Manager modules: imported by `home/profiles/*.nix`.
-- **Formatting**: Standard Nix formatting. Prefer clarity and modularity.
+- **Formatting**: `nixfmt-rfc-style` (canonical, in devShell). `alejandra` also available as user package.
 - **Versions**: Maintain `system.stateVersion = "25.11"` (NixOS) and `home.stateVersion = "25.11"`. Darwin hosts use integer `system.stateVersion` (for example, `6`).
-- **Packages**: Use `pkgs-unstable` for newer software if needed (passed via `specialArgs`).
+- **Packages**: Use `pkgs-unstable` for newer software if needed (passed via `specialArgs`). Three package sets: `pkgs` (stable), `pkgs-unstable`, `pkgs-with-llm-agents` (HM-only). All have `allowUnfree = true`.
 
 ## Strict File & Directory Rules
 - **Directory Boundaries**:
@@ -30,7 +47,7 @@
   - `profiles/nixos/`: NixOS profile aggregators. Each file bundles modules for a host type (desktop, server).
   - `profiles/darwin/`: Darwin profile aggregators.
   - `home/profiles/`: Home Manager profile aggregators. Each file bundles program configs and package groups for a host type.
-  - `home/packages/`: Home Manager package groups by purpose. Each file sets `home.packages`.
+  - `home/packages/`: Home Manager package groups by purpose. Each file sets `home.packages`. Platform-conditionals inside files (via `pkgs.stdenv.isLinux` or `hostMeta.hostName` checks) keep Darwin from inheriting Linux-only tools.
   - `home/programs/`: Per-program Home Manager configuration.
   - `packages/`: overlays and derivations only.
   - `dotfiles/`: static files only (no Nix option definitions).
