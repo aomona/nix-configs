@@ -362,8 +362,6 @@
 
       deploy.nodes = lib.mapAttrs mkDeployNode (hosts // servers);
 
-      checks = lib.mapAttrs (system: deployLib: deployLib.deployChecks self.deploy) deploy-rs.lib;
-
       devShells = forAllSystems (
         system:
         let
