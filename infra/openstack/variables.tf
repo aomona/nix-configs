@@ -11,7 +11,7 @@ variable "host_name" {
 
 variable "config_ref" {
   type        = string
-  description = "Git branch/tag/commit in github:akazdayo/nix-configs containing the host output"
+  description = "Git branch/tag/commit in github:akazdayo/nix-configs containing the host output (DEPRECATED: no longer used for rebuild by bootstrap; retained for template compatibility)"
   default     = "main"
 }
 

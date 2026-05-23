@@ -14,4 +14,16 @@ in
     shell = pkgs.nushell;
     openssh.authorizedKeys.keys = hostData.users.${primaryUser}.authorizedKeys;
   };
+
+  security.sudo.extraRules = [
+    {
+      users = [ primaryUser ];
+      commands = [
+        {
+          command = "ALL";
+          options = [ "NOPASSWD" ];
+        }
+      ];
+    }
+  ];
 }

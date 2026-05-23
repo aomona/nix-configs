@@ -4,7 +4,7 @@
 Parent: [root AGENTS.md](../../AGENTS.md)
 
 ## OVERVIEW
-OpenTofu/Terraform IaC for provisioning NixOS VMs on OpenStack. Bootstraps via amazon-init (NixOS built-in) running `nixos-rebuild boot` from the flake.
+OpenTofu/Terraform IaC for provisioning NixOS VMs on OpenStack. Uses minimal cloud-init to prepare SSH access for deploy-rs, which is the primary NixOS deployment mechanism.
 
 ## STRUCTURE
 ```
@@ -14,7 +14,7 @@ infra/openstack/
 ├── outputs.tf               # instance_id, fixed_ip, floating_ip, ssh_host
 ├── providers.tf             # OpenStack provider (auth from env, NOT tracked)
 ├── versions.tf              # OpenTofu >= 1.6.0, openstack provider ~> 3.4
-├── user-data.sh.tftpl        # Bootstrap template: amazon-init runs nixos-rebuild boot
+├── user-data.sh.tftpl        # Bootstrap template: creates deploy-rs user with SSH keys + sudo
 ├── terraform.tfvars.example # Example variable values
 ├── .terraform.lock.hcl      # Lock file — TRACKED in git
 ├── README.md                # Full provisioning guide
@@ -35,7 +35,8 @@ infra/openstack/
 - **State gitignored, lockfile tracked**: `*.tfstate` and `*.tfvars` are in `.gitignore`. `.terraform.lock.hcl` IS tracked.
 - **Keypair preference**: Always use an existing `keypair_name` — avoids generating private keys in Terraform state.
 - **CIDR rules**: Never `0.0.0.0/0`. Always explicit CIDR blocks for SSH access.
-- **`config_ref` pinning**: Use branch during dev, pin to tag/commit for production. Must match a ref where `nixosConfigurations.openstack` exists in the flake.
+- **Persistent VM with lifecycle guard**: `lifecycle { ignore_changes = [user_data] }` protects the VM from being replaced when bootstrap script changes. Review changes with `tofu plan` before applying.
+- **`config_ref` deprecated**: No longer used for rebuilding from cloud-init. Variable retained for template compatibility; deploy-rs handles all NixOS deployment.
 
 ## COMMANDS
 ```bash
@@ -43,11 +44,14 @@ infra/openstack/
 source ../../openrc.sh                     # or set OS_* env vars
 
 # From repo root
-nix develop                                # provides opentofu
+nix develop                                # provides opentofu + deploy-rs
 tofu -chdir=infra/openstack init
 tofu -chdir=infra/openstack plan -var-file=terraform.tfvars
 tofu -chdir=infra/openstack apply -var-file=terraform.tfvars
 tofu -chdir=infra/openstack output ssh_host
+
+# Deploy NixOS (resolves SSH host from tofu output)
+nix run .#deploy-openstack
 
 # Offline validation (no credentials)
 nix develop -c tofu -chdir=infra/openstack fmt -check
@@ -60,11 +64,12 @@ nix develop -c tofu -chdir=infra/openstack validate -var-file=terraform.tfvars.e
 - Committing auth credentials (API keys, tokens, `clouds.yaml` secrets).
 - Using `0.0.0.0/0` for `ssh_allowed_cidrs` — always restrict to your IP range.
 - Running `tofu apply` before `tofu plan` — review changes first.
-- Changing `image_id`, `config_drive`, or `key_pair` on a live instance — destroys and recreates the VM.
+- Changing `image_id`, `config_drive`, or `key_pair` on a live instance — destroys and recreates the VM. Use `tofu plan` to confirm.
 
 ## NOTES
-- Bootstrap uses **amazon-init** (NixOS built-in) to execute user_data as a shell script. Logs to `/var/log/nixos-bootstrap.log`.
-- First-boot SSH goes to `root` (OpenStack keypair injection), not the configured user. After bootstrap reboot, user config takes over.
-- The `openstack` host is NOT in `deploy.nodes` — provisioning + bootstrap replaces deploy-rs for this host.
-- The VM is considered **ephemeral** — most resource changes destroy and recreate the instance.
-- `terraform.tfvars.example` serves as both documentation and offline validation input.
+- Bootstrap uses **amazon-init** (NixOS built-in) to execute user_data as a shell script. Creates the deploy-rs SSH user and grants passwordless sudo. Does NOT run `nixos-rebuild`. Logs to `/var/log/nixos-bootstrap.log`.
+- First-boot SSH goes to `root` (OpenStack keypair injection). After bootstrap, the deploy-rs user is created with the same authorized keys.
+- The `openstack` host IS in `deploy.nodes` — deploy-rs is the primary NixOS deployment mechanism. OpenTofu handles infrastructure (network, security group, instance).
+- The IP address is **not hardcoded** in flake.nix. Use the `nix run .#deploy-openstack` wrapper which resolves the SSH host from tofu output automatically.
+- The VM persists across config changes — `user_data` changes are ignored via lifecycle policy to prevent accidental replacement.
+- The VM is considered **persistent** — infrastructure changes should be reviewed via `tofu plan` before applying.

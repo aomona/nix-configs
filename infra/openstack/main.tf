@@ -88,6 +88,10 @@ resource "openstack_compute_instance_v2" "instance" {
   vendor_options {
     detach_ports_before_destroy = true
   }
+
+  lifecycle {
+    ignore_changes = [user_data]
+  }
 }
 
 resource "openstack_networking_floatingip_v2" "fip" {
