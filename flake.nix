@@ -323,6 +323,7 @@
 
       openstackHosts = {
         openstack = {
+          sshUser = "deploy";
           remoteBuild = true;
           activationTimeout = 600;
         };
@@ -342,6 +343,7 @@
         hostName:
         {
           deployHostname ? hostName,
+          sshUser ? defaultPrimaryUser,
           system ? "x86_64-linux",
           remoteBuild ? false,
           activationTimeout ? null,
@@ -354,7 +356,7 @@
             "~/.ssh/id_ed25519_sk_rk"
           ];
           profiles.system = {
-            sshUser = defaultPrimaryUser;
+            inherit sshUser;
             user = "root";
             path = deploy-rs.lib.${system}.activate.nixos self.nixosConfigurations.${hostName};
           };
@@ -388,7 +390,7 @@
                 script = pkgs.writeShellScript "deploy-openstack" ''
                   set -euo pipefail
                   HOST=$(${pkgs.opentofu}/bin/tofu -chdir=infra/openstack output -raw ssh_host)
-                  exec ${deploy-rs.packages.${system}.default}/bin/deploy .#openstack --hostname "$HOST" --magic-rollback false "$@"
+                  exec ${deploy-rs.packages.${system}.default}/bin/deploy .#openstack --hostname "$HOST" "$@"
                 '';
               in
               "${script}";

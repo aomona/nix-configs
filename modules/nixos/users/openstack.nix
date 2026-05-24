@@ -15,9 +15,16 @@ in
     openssh.authorizedKeys.keys = hostData.users.${primaryUser}.authorizedKeys;
   };
 
+  users.users.deploy = {
+    isNormalUser = true;
+    description = "deploy-rs deployment user";
+    extraGroups = [ "wheel" ];
+    openssh.authorizedKeys.keys = hostData.users.${primaryUser}.authorizedKeys;
+  };
+
   security.sudo.extraRules = [
     {
-      users = [ primaryUser ];
+      users = [ "deploy" ];
       commands = [
         {
           command = "ALL";

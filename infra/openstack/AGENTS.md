@@ -67,9 +67,8 @@ nix develop -c tofu -chdir=infra/openstack validate -var-file=terraform.tfvars.e
 - Changing `image_id`, `config_drive`, or `key_pair` on a live instance — destroys and recreates the VM. Use `tofu plan` to confirm.
 
 ## NOTES
-- Bootstrap uses **amazon-init** (NixOS built-in) to execute user_data as a shell script. Creates the deploy-rs SSH user and grants passwordless sudo. Does NOT run `nixos-rebuild`. Logs to `/var/log/nixos-bootstrap.log`.
-- First-boot SSH goes to `root` (OpenStack keypair injection). After bootstrap, the deploy-rs user is created with the same authorized keys.
-- The `openstack` host IS in `deploy.nodes` — deploy-rs is the primary NixOS deployment mechanism. OpenTofu handles infrastructure (network, security group, instance).
+- Bootstrap uses **amazon-init** (NixOS built-in) to execute user_data as a shell script. Creates the `deploy` user with SSH keys and NOPASSWD sudo for deploy-rs. Does NOT run `nixos-rebuild`. Logs to `/var/log/nixos-bootstrap.log`.
+- First-boot SSH goes to `root` (OpenStack keypair injection). After bootstrap, the `deploy` user is created with the same authorized keys.
 - The IP address is **not hardcoded** in flake.nix. Use the `nix run .#deploy-openstack` wrapper which resolves the SSH host from tofu output automatically.
 - The VM persists across config changes — `user_data` changes are ignored via lifecycle policy to prevent accidental replacement.
 - The VM is considered **persistent** — infrastructure changes should be reviewed via `tofu plan` before applying.

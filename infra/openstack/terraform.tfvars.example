@@ -19,7 +19,7 @@ metadata = {
 
 tags = ["nixos", "openstack"]
 
-ssh_user = "akazdayo"
+ssh_user = "deploy"
 
 # Alternative without a floating IP:
 # allocate_floating_ip   = false

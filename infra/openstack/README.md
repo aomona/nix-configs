@@ -25,7 +25,7 @@ tofu -chdir=infra/openstack plan -var-file=terraform.tfvars
 tofu -chdir=infra/openstack apply -var-file=terraform.tfvars
 
 # 7. Verify bootstrap (should return without error)
-ssh akazdayo@$(tofu -chdir=infra/openstack output -raw ssh_host) 'sudo -n true'
+ssh deploy@$(tofu -chdir=infra/openstack output -raw ssh_host) 'sudo -n true'
 
 # 8. Deploy NixOS config via deploy-rs (wraps --hostname resolution)
 nix run .#deploy-openstack
@@ -45,8 +45,8 @@ nix run .#deploy-openstack
 
 | Stage | Tool | What It Does |
 |-------|------|-------------|
-| Provision | `tofu apply` | Creates VM, port, security group. Bootstrap creates `akazdayo` user with SSH keys + sudo. |
-| Deploy | `nix run .#deploy-openstack` | Resolves SSH host from tofu output, pushes NixOS closure via deploy-rs. |
+| Provision | `tofu apply` | Creates VM, port, security group. Bootstrap creates `deploy` user with SSH keys + NOPASSWD sudo. |
+| Deploy | `nix run .#deploy-openstack` | Connects as `deploy` user, pushes NixOS closure via deploy-rs. |
 | Update | `nix run .#deploy-openstack` | Pushes updated NixOS closure. TF not needed for config changes. |
 
 If you run the copy command from the repository root instead of inside `infra/openstack`, use:

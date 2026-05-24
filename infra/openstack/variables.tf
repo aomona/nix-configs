@@ -90,6 +90,6 @@ variable "tags" {
 
 variable "ssh_user" {
   type        = string
-  description = "SSH username for post-bootstrap access"
-  default     = "akazdayo"
+  description = "SSH username for deploy-rs bootstrap access (created by user-data script with NOPASSWD sudo)"
+  default     = "deploy"
 }
