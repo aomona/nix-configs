@@ -8,9 +8,10 @@ in
   networking.networkmanager.enable = true;
   networking.interfaces.${primaryInterface}.useDHCP = true;
 
-  # First-boot userdata is handled by the base NixOS OpenStack image's
-  # openstack-config/amazon-init (not cloud-init). Avoid enabling cloud-init
-  # here to prevent dual metadata engines from racing on the same config-drive.
+  # First-boot userdata comes from infra/openstack/user-data.sh.tftpl via the
+  # base NixOS OpenStack image's openstack-config/amazon-init service.
+  # Avoid enabling cloud-init here to prevent dual metadata engines from
+  # racing on the same config-drive.
   services.cloud-init.enable = false;
 
   services.openssh = {

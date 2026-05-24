@@ -4,13 +4,16 @@ set -euo pipefail
 LOGFILE="/var/log/nixos-bootstrap.log"
 MARKER="/var/lib/nixos-bootstrap/success"
 SSH_USER="${ssh_user}"
+SSH_HOME="/home/$SSH_USER/.ssh"
+AUTHORIZED_KEYS="$SSH_HOME/authorized_keys"
+SUDOERS_FILE="/etc/sudoers.d/99-deploy-rs-bootstrap"
+NIX_CONF="/etc/nix/nix.conf"
 
 mkdir -p "$(dirname "$LOGFILE")" "$(dirname "$MARKER")"
 exec > >(tee -a "$LOGFILE") 2>&1
 
 echo "=== NixOS bootstrap (deploy-rs prep) started at $(date -u) ==="
-echo "host_name=${host_name}"
-echo "ssh_user=${ssh_user}"
+echo "ssh_user=$SSH_USER"
 
 if [ -f "$MARKER" ]; then
   echo "Bootstrap already completed; marker exists at $MARKER"
@@ -25,23 +28,18 @@ else
 fi
 
 echo "Setting up SSH authorized keys for $SSH_USER"
-mkdir -p "/home/$SSH_USER/.ssh"
+install -d -m 700 -o "$SSH_USER" -g "$SSH_USER" "$SSH_HOME"
 if [ -f /root/.ssh/authorized_keys ]; then
-  cp /root/.ssh/authorized_keys "/home/$SSH_USER/.ssh/authorized_keys"
+  install -m 600 -o "$SSH_USER" -g "$SSH_USER" /root/.ssh/authorized_keys "$AUTHORIZED_KEYS"
 elif [ -f /home/nixos/.ssh/authorized_keys ]; then
-  cp /home/nixos/.ssh/authorized_keys "/home/$SSH_USER/.ssh/authorized_keys"
+  install -m 600 -o "$SSH_USER" -g "$SSH_USER" /home/nixos/.ssh/authorized_keys "$AUTHORIZED_KEYS"
 else
   echo "WARNING: No authorized_keys found for root or nixos user"
 fi
-chown -R "$SSH_USER:$SSH_USER" "/home/$SSH_USER/.ssh"
-chmod 700 "/home/$SSH_USER/.ssh"
-chmod 600 "/home/$SSH_USER/.ssh/authorized_keys"
 
 echo "Granting passwordless sudo for deploy-rs bootstrap"
-echo "$SSH_USER ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/99-deploy-rs-bootstrap
-chmod 440 /etc/sudoers.d/99-deploy-rs-bootstrap
-
-NIX_CONF="/etc/nix/nix.conf"
+echo "$SSH_USER ALL=(ALL) NOPASSWD:ALL" > "$SUDOERS_FILE"
+chmod 440 "$SUDOERS_FILE"
 
 if ! grep -qE '^\s*(extra-)?experimental-features\s*=\s*.*\bnix-command\b' "$NIX_CONF" 2>/dev/null || \
    ! grep -qE '^\s*(extra-)?experimental-features\s*=\s*.*\bflakes\b' "$NIX_CONF" 2>/dev/null; then
@@ -52,4 +50,4 @@ fi
 
 date -u '+%Y-%m-%dT%H:%M:%SZ bootstrap complete; ready for deploy-rs' > "$MARKER"
 echo "=== NixOS bootstrap completed at $(date -u) ==="
-echo "Host is ready for deploy-rs. Run: deploy .#${host_name}"
+echo "Host is ready for deploy-rs"
