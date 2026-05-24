@@ -19,7 +19,7 @@ fi
 
 echo "Creating deploy-rs user: $SSH_USER"
 if ! id "$SSH_USER" >/dev/null 2>&1; then
-  useradd -m -G wheel,networkmanager "$SSH_USER"
+  useradd -m -G wheel "$SSH_USER"
 else
   echo "User $SSH_USER already exists; skipping creation"
 fi
@@ -42,7 +42,6 @@ echo "$SSH_USER ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/99-deploy-rs-bootstrap
 chmod 440 /etc/sudoers.d/99-deploy-rs-bootstrap
 
 NIX_CONF="/etc/nix/nix.conf"
-mkdir -p "$(dirname "$NIX_CONF")"
 
 if ! grep -qE '^\s*(extra-)?experimental-features\s*=\s*.*\bnix-command\b' "$NIX_CONF" 2>/dev/null || \
    ! grep -qE '^\s*(extra-)?experimental-features\s*=\s*.*\bflakes\b' "$NIX_CONF" 2>/dev/null; then

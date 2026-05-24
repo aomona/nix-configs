@@ -9,12 +9,6 @@ variable "host_name" {
   default     = "openstack"
 }
 
-variable "config_ref" {
-  type        = string
-  description = "Git branch/tag/commit in github:akazdayo/nix-configs containing the host output (DEPRECATED: no longer used for rebuild by bootstrap; retained for template compatibility)"
-  default     = "main"
-}
-
 variable "image_id" {
   type        = string
   description = "Glance image UUID for NixOS qcow2"

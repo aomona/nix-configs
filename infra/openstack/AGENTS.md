@@ -36,7 +36,7 @@ infra/openstack/
 - **Keypair preference**: Always use an existing `keypair_name` — avoids generating private keys in Terraform state.
 - **CIDR rules**: Never `0.0.0.0/0`. Always explicit CIDR blocks for SSH access.
 - **Persistent VM with lifecycle guard**: `lifecycle { ignore_changes = [user_data] }` protects the VM from being replaced when bootstrap script changes. Review changes with `tofu plan` before applying.
-- **`config_ref` deprecated**: No longer used for rebuilding from cloud-init. Variable retained for template compatibility; deploy-rs handles all NixOS deployment.
+- **Deploy-rs is the sole deployment mechanism**: NixOS config is pushed via `nix run .#deploy-openstack` which wraps tofu output resolution + deploy-rs. No bootstrap-time rebuild.
 
 ## COMMANDS
 ```bash
