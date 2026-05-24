@@ -25,7 +25,10 @@ tofu -chdir=infra/openstack apply -var-file=terraform.tfvars
 # 7. Get SSH host
 tofu -chdir=infra/openstack output ssh_host
 
-# 8. SSH into the VM
+# 8. First deploy, building on the OpenStack VM
+deploy --hostname "$(tofu -chdir=infra/openstack output -raw ssh_host)" --ssh-user root .#openstack
+
+# 9. SSH into the VM after deploy
 ssh akazdayo@$(tofu -chdir=infra/openstack output -raw ssh_host)
 ```
 
@@ -34,3 +37,16 @@ If you run the copy command from the repository root instead of inside `infra/op
 ```bash
 cp infra/openstack/terraform.tfvars.example infra/openstack/terraform.tfvars
 ```
+
+After the first deploy creates the configured user and disables root SSH login,
+subsequent deploys can use the normal deploy-rs node:
+
+```bash
+deploy --hostname "$(tofu -chdir=infra/openstack output -raw ssh_host)" .#openstack
+```
+
+Alternatively, add an SSH config alias named `openstack` for the output host and
+run `deploy .#openstack`.
+
+The OpenStack user-data does not run `nixos-rebuild`; it only enables Nix
+flakes on the base image so deploy-rs can perform the first remote build.

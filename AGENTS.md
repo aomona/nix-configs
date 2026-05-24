@@ -83,7 +83,7 @@ Import chain: `flake.nix` → host (`hosts/<name>/default.nix`) → profile (`pr
   - Other `secrets/` subdirectories contain only `.gitkeep` placeholders.
   - Legacy container secret paths (`/etc/nextcloud-adminpass`, `/etc/searx-env`) remain host-local files. Do not migrate them to sops-nix without an explicit task.
 - **Deploy Coverage**:
-  - `deploy-rs` nodes only cover `nixos` (192.168.11.48) and `server` (192.168.11.50). The `openstack` host is provisioned via OpenTofu + cloud-init bootstrap — not deploy-rs.
+  - `deploy-rs` nodes cover `nixos` (192.168.11.48), `server` (192.168.11.50), and `openstack` (SSH alias/default hostname `openstack`, `remoteBuild = true`). The `openstack` host is provisioned by OpenTofu, then configured via deploy-rs.
   - Darwin hosts are not deployable via deploy-rs.
 - **Non-Standard Root Directories**:
   - `cursors/`: Custom cursor theme derivations. Not a standard flake repo directory.

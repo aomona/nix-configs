@@ -72,11 +72,7 @@ resource "openstack_compute_instance_v2" "instance" {
   flavor_name  = var.flavor_name
   key_pair     = var.keypair_name != "" ? data.openstack_compute_keypair_v2.existing[0].name : (var.public_key_path != "" ? openstack_compute_keypair_v2.imported[0].name : null)
   config_drive = true
-  user_data = templatefile("${path.module}/user-data.sh.tftpl", {
-    host_name  = var.host_name
-    config_ref = var.config_ref
-    ssh_user   = var.ssh_user
-  })
+  user_data    = file("${path.module}/user-data.sh.tftpl")
 
   network {
     port = openstack_networking_port_v2.port.id

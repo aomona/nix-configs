@@ -3,18 +3,6 @@ variable "instance_name" {
   description = "Name of the OpenStack compute instance"
 }
 
-variable "host_name" {
-  type        = string
-  description = "NixOS flake host output name for nixos-rebuild"
-  default     = "openstack"
-}
-
-variable "config_ref" {
-  type        = string
-  description = "Git branch/tag/commit in github:akazdayo/nix-configs containing the host output"
-  default     = "main"
-}
-
 variable "image_id" {
   type        = string
   description = "Glance image UUID for NixOS qcow2"
@@ -86,10 +74,4 @@ variable "tags" {
   type        = list(string)
   description = "Instance tags"
   default     = ["nixos", "openstack"]
-}
-
-variable "ssh_user" {
-  type        = string
-  description = "SSH username for post-bootstrap access"
-  default     = "akazdayo"
 }

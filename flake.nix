@@ -322,7 +322,10 @@
       };
 
       openstackHosts = {
-        openstack = { };
+        openstack = {
+          deployHostname = "openstack";
+          deployRemoteBuild = true;
+        };
       };
 
       darwinHosts = {
@@ -339,6 +342,7 @@
         hostName:
         {
           deployHostname ? hostName,
+          deployRemoteBuild ? false,
           system ? "x86_64-linux",
           ...
         }:
@@ -351,16 +355,20 @@
           profiles.system = {
             sshUser = defaultPrimaryUser;
             user = "root";
+            remoteBuild = deployRemoteBuild;
             path = deploy-rs.lib.${system}.activate.nixos self.nixosConfigurations.${hostName};
           };
         };
     in
     {
-      nixosConfigurations = (lib.mapAttrs mkHost hosts) // (lib.mapAttrs mkServer servers) // (lib.mapAttrs mkOpenStackHost openstackHosts);
+      nixosConfigurations =
+        (lib.mapAttrs mkHost hosts)
+        // (lib.mapAttrs mkServer servers)
+        // (lib.mapAttrs mkOpenStackHost openstackHosts);
 
       darwinConfigurations = lib.mapAttrs mkDarwinHost darwinHosts;
 
-      deploy.nodes = lib.mapAttrs mkDeployNode (hosts // servers);
+      deploy.nodes = lib.mapAttrs mkDeployNode (hosts // servers // openstackHosts);
 
       devShells = forAllSystems (
         system:
