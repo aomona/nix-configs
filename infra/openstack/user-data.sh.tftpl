@@ -41,6 +41,16 @@ echo "Granting passwordless sudo for deploy-rs bootstrap"
 echo "$SSH_USER ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/99-deploy-rs-bootstrap
 chmod 440 /etc/sudoers.d/99-deploy-rs-bootstrap
 
+NIX_CONF="/etc/nix/nix.conf"
+mkdir -p "$(dirname "$NIX_CONF")"
+
+if ! grep -qE '^\s*(extra-)?experimental-features\s*=\s*.*\bnix-command\b' "$NIX_CONF" 2>/dev/null || \
+   ! grep -qE '^\s*(extra-)?experimental-features\s*=\s*.*\bflakes\b' "$NIX_CONF" 2>/dev/null; then
+  echo "Enabling nix-command and flakes for deploy-rs remote builds"
+  printf '\nextra-experimental-features = nix-command flakes\n' >> "$NIX_CONF"
+  systemctl try-reload-or-restart nix-daemon.service || true
+fi
+
 date -u '+%Y-%m-%dT%H:%M:%SZ bootstrap complete; ready for deploy-rs' > "$MARKER"
 echo "=== NixOS bootstrap completed at $(date -u) ==="
 echo "Host is ready for deploy-rs. Run: deploy .#${host_name}"

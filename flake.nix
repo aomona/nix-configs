@@ -388,7 +388,7 @@
                 script = pkgs.writeShellScript "deploy-openstack" ''
                   set -euo pipefail
                   HOST=$(${pkgs.opentofu}/bin/tofu -chdir=infra/openstack output -raw ssh_host)
-                  exec ${deploy-rs.packages.${system}.default}/bin/deploy .#openstack --hostname "$HOST" "$@"
+                  exec ${deploy-rs.packages.${system}.default}/bin/deploy .#openstack --hostname "$HOST" --magic-rollback false "$@"
                 '';
               in
               "${script}";
