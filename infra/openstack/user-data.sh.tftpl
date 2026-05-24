@@ -26,13 +26,14 @@ if ! id "$SSH_USER" >/dev/null 2>&1; then
 else
   echo "User $SSH_USER already exists; skipping creation"
 fi
+SSH_GROUP="$(id -gn "$SSH_USER")"
 
 echo "Setting up SSH authorized keys for $SSH_USER"
-install -d -m 700 -o "$SSH_USER" -g "$SSH_USER" "$SSH_HOME"
+install -d -m 700 -o "$SSH_USER" -g "$SSH_GROUP" "$SSH_HOME"
 if [ -f /root/.ssh/authorized_keys ]; then
-  install -m 600 -o "$SSH_USER" -g "$SSH_USER" /root/.ssh/authorized_keys "$AUTHORIZED_KEYS"
+  install -m 600 -o "$SSH_USER" -g "$SSH_GROUP" /root/.ssh/authorized_keys "$AUTHORIZED_KEYS"
 elif [ -f /home/nixos/.ssh/authorized_keys ]; then
-  install -m 600 -o "$SSH_USER" -g "$SSH_USER" /home/nixos/.ssh/authorized_keys "$AUTHORIZED_KEYS"
+  install -m 600 -o "$SSH_USER" -g "$SSH_GROUP" /home/nixos/.ssh/authorized_keys "$AUTHORIZED_KEYS"
 else
   echo "WARNING: No authorized_keys found for root or nixos user"
 fi
