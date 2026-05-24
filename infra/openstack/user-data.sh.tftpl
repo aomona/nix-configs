@@ -3,33 +3,51 @@ set -euo pipefail
 
 LOGFILE="/var/log/nixos-bootstrap.log"
 MARKER="/var/lib/nixos-bootstrap/success"
-FLAKE_REF="github:akazdayo/nix-configs/${config_ref}#${host_name}"
+SSH_USER="${ssh_user}"
+SSH_HOME="/home/$SSH_USER/.ssh"
+AUTHORIZED_KEYS="$SSH_HOME/authorized_keys"
+SUDOERS_FILE="/etc/sudoers.d/99-deploy-rs-bootstrap"
+NIX_CONF="/etc/nix/nix.conf"
 
 mkdir -p "$(dirname "$LOGFILE")" "$(dirname "$MARKER")"
 exec > >(tee -a "$LOGFILE") 2>&1
 
-echo "=== NixOS bootstrap started at $(date -u) ==="
-echo "host_name=${host_name}"
-echo "config_ref=${config_ref}"
-echo "ssh_user=${ssh_user}"
+echo "=== NixOS bootstrap (deploy-rs prep) started at $(date -u) ==="
+echo "ssh_user=$SSH_USER"
 
 if [ -f "$MARKER" ]; then
-  echo "Bootstrap already completed successfully; marker exists at $MARKER"
+  echo "Bootstrap already completed; marker exists at $MARKER"
   exit 0
 fi
 
-if ! command -v nixos-rebuild >/dev/null 2>&1; then
-  echo "ERROR: nixos-rebuild not found. Is this a NixOS image?"
-  exit 1
+echo "Creating deploy-rs user: $SSH_USER"
+if ! id "$SSH_USER" >/dev/null 2>&1; then
+  useradd -m -G wheel "$SSH_USER"
+else
+  echo "User $SSH_USER already exists; skipping creation"
 fi
 
-export NIX_CONFIG='experimental-features = nix-command flakes'
+echo "Setting up SSH authorized keys for $SSH_USER"
+install -d -m 700 -o "$SSH_USER" -g "$SSH_USER" "$SSH_HOME"
+if [ -f /root/.ssh/authorized_keys ]; then
+  install -m 600 -o "$SSH_USER" -g "$SSH_USER" /root/.ssh/authorized_keys "$AUTHORIZED_KEYS"
+elif [ -f /home/nixos/.ssh/authorized_keys ]; then
+  install -m 600 -o "$SSH_USER" -g "$SSH_USER" /home/nixos/.ssh/authorized_keys "$AUTHORIZED_KEYS"
+else
+  echo "WARNING: No authorized_keys found for root or nixos user"
+fi
 
-echo "Running: nixos-rebuild boot --flake $FLAKE_REF"
-nixos-rebuild boot --flake "$FLAKE_REF"
+echo "Granting passwordless sudo for deploy-rs bootstrap"
+echo "$SSH_USER ALL=(ALL) NOPASSWD:ALL" > "$SUDOERS_FILE"
+chmod 440 "$SUDOERS_FILE"
 
-date -u '+%Y-%m-%dT%H:%M:%SZ rebuild succeeded; reboot requested' > "$MARKER"
-echo "=== NixOS bootstrap completed successfully at $(date -u) ==="
-echo "Success marker written to $MARKER"
-echo "Rebooting to activate the bootstrapped NixOS generation."
-systemctl reboot --no-block
+if ! grep -qE '^\s*(extra-)?experimental-features\s*=\s*.*\bnix-command\b' "$NIX_CONF" 2>/dev/null || \
+   ! grep -qE '^\s*(extra-)?experimental-features\s*=\s*.*\bflakes\b' "$NIX_CONF" 2>/dev/null; then
+  echo "Enabling nix-command and flakes for deploy-rs remote builds"
+  printf '\nextra-experimental-features = nix-command flakes\n' >> "$NIX_CONF"
+  systemctl try-reload-or-restart nix-daemon.service || true
+fi
+
+date -u '+%Y-%m-%dT%H:%M:%SZ bootstrap complete; ready for deploy-rs' > "$MARKER"
+echo "=== NixOS bootstrap completed at $(date -u) ==="
+echo "Host is ready for deploy-rs"

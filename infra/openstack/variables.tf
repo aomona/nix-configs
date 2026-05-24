@@ -9,12 +9,6 @@ variable "host_name" {
   default     = "openstack"
 }
 
-variable "config_ref" {
-  type        = string
-  description = "Git branch/tag/commit in github:akazdayo/nix-configs containing the host output"
-  default     = "main"
-}
-
 variable "image_id" {
   type        = string
   description = "Glance image UUID for NixOS qcow2"
@@ -90,6 +84,6 @@ variable "tags" {
 
 variable "ssh_user" {
   type        = string
-  description = "SSH username for post-bootstrap access"
-  default     = "akazdayo"
+  description = "SSH username for deploy-rs bootstrap access (created by user-data script with NOPASSWD sudo)"
+  default     = "deploy"
 }

@@ -73,9 +73,7 @@ resource "openstack_compute_instance_v2" "instance" {
   key_pair     = var.keypair_name != "" ? data.openstack_compute_keypair_v2.existing[0].name : (var.public_key_path != "" ? openstack_compute_keypair_v2.imported[0].name : null)
   config_drive = true
   user_data = templatefile("${path.module}/user-data.sh.tftpl", {
-    host_name  = var.host_name
-    config_ref = var.config_ref
-    ssh_user   = var.ssh_user
+    ssh_user = var.ssh_user
   })
 
   network {
@@ -87,6 +85,10 @@ resource "openstack_compute_instance_v2" "instance" {
 
   vendor_options {
     detach_ports_before_destroy = true
+  }
+
+  lifecycle {
+    ignore_changes = [user_data]
   }
 }
 

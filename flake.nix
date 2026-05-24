@@ -322,7 +322,11 @@
       };
 
       openstackHosts = {
-        openstack = { };
+        openstack = {
+          sshUser = "deploy";
+          remoteBuild = true;
+          activationTimeout = 600;
+        };
       };
 
       darwinHosts = {
@@ -339,7 +343,10 @@
         hostName:
         {
           deployHostname ? hostName,
+          sshUser ? defaultPrimaryUser,
           system ? "x86_64-linux",
+          remoteBuild ? false,
+          activationTimeout ? null,
           ...
         }:
         {
@@ -349,18 +356,47 @@
             "~/.ssh/id_ed25519_sk_rk"
           ];
           profiles.system = {
-            sshUser = defaultPrimaryUser;
+            inherit sshUser;
             user = "root";
             path = deploy-rs.lib.${system}.activate.nixos self.nixosConfigurations.${hostName};
           };
-        };
+        }
+        // lib.optionalAttrs remoteBuild { inherit remoteBuild; }
+        // lib.optionalAttrs (activationTimeout != null) { inherit activationTimeout; };
     in
     {
-      nixosConfigurations = (lib.mapAttrs mkHost hosts) // (lib.mapAttrs mkServer servers) // (lib.mapAttrs mkOpenStackHost openstackHosts);
+      nixosConfigurations =
+        (lib.mapAttrs mkHost hosts)
+        // (lib.mapAttrs mkServer servers)
+        // (lib.mapAttrs mkOpenStackHost openstackHosts);
 
       darwinConfigurations = lib.mapAttrs mkDarwinHost darwinHosts;
 
-      deploy.nodes = lib.mapAttrs mkDeployNode (hosts // servers);
+      deploy.nodes = lib.mapAttrs mkDeployNode (hosts // servers // openstackHosts);
+
+      apps = forAllSystems (
+        system:
+        let
+          pkgs = import nixpkgs {
+            inherit system;
+            config.allowUnfree = true;
+          };
+        in
+        {
+          deploy-openstack = {
+            type = "app";
+            program =
+              let
+                script = pkgs.writeShellScript "deploy-openstack" ''
+                  set -euo pipefail
+                  HOST=$(${pkgs.opentofu}/bin/tofu -chdir=infra/openstack output -raw ssh_host)
+                  exec ${deploy-rs.packages.${system}.default}/bin/deploy .#openstack --hostname "$HOST" "$@"
+                '';
+              in
+              "${script}";
+          };
+        }
+      );
 
       devShells = forAllSystems (
         system:
