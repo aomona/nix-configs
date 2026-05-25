@@ -89,6 +89,11 @@ let
         };
       };
     };
+
+    minecraft = {
+      serverPort = 25565;
+      jvmOpts = "-Xms4G -Xmx8G";
+    };
   };
 in
 {
