@@ -64,7 +64,10 @@ jobs:
           - host: server
             runs-on: ubuntu-latest
             flake-attr: nixosConfigurations
-          - host: openstack
+          - host: gateway
+            runs-on: ubuntu-latest
+            flake-attr: nixosConfigurations
+          - host: minecraft
             runs-on: ubuntu-latest
             flake-attr: nixosConfigurations
           - host: macbook

@@ -213,8 +213,8 @@
             flakeRoot = resolvedFlakeRoot;
           };
           hostData =
-            (import (./hosts + "/${hostName}/host-data.nix") { hostMeta = baseHostMeta; })._module.args.hostData
-              or { };
+            (import (./hosts/openstack + "/${hostName}/host-data.nix") { hostMeta = baseHostMeta; })
+            ._module.args.hostData or { };
           hostMeta = baseHostMeta // {
             inherit hostData;
           };
@@ -233,14 +233,14 @@
           };
           modules = [
             ./packages
-            (./hosts + "/${hostName}")
+            (./hosts/openstack + "/${hostName}")
             lanzaboote.nixosModules.lanzaboote
             sops-nix.nixosModules.default
             home-manager.nixosModules.home-manager
             {
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
-              home-manager.users.${primaryUser} = import ./home/profiles/openstack.nix;
+              home-manager.users.${primaryUser} = import (./home/profiles/openstack + "/${hostName}");
               home-manager.extraSpecialArgs = {
                 inherit
                   self
@@ -322,7 +322,12 @@
       };
 
       openstackHosts = {
-        openstack = {
+        gateway = {
+          sshUser = "deploy";
+          remoteBuild = true;
+          activationTimeout = 600;
+        };
+        minecraft = {
           sshUser = "deploy";
           remoteBuild = true;
           activationTimeout = 600;
@@ -381,19 +386,21 @@
             inherit system;
             config.allowUnfree = true;
           };
+          deploy-openstack-script = pkgs.writeShellScript "deploy-openstack" ''
+            set -euo pipefail
+            TARGET_HOST="''${1:-}"
+            if [ -z "$TARGET_HOST" ]; then
+              echo "Usage: nix run .#deploy-openstack -- <hostname>" >&2
+              exit 1
+            fi
+            HOST=$(${pkgs.opentofu}/bin/tofu -chdir=infra/openstack/$TARGET_HOST output -raw ssh_host)
+            exec ${deploy-rs.packages.${system}.default}/bin/deploy .#$TARGET_HOST --hostname "$HOST" "''${@:2}"
+          '';
         in
         {
           deploy-openstack = {
             type = "app";
-            program =
-              let
-                script = pkgs.writeShellScript "deploy-openstack" ''
-                  set -euo pipefail
-                  HOST=$(${pkgs.opentofu}/bin/tofu -chdir=infra/openstack output -raw ssh_host)
-                  exec ${deploy-rs.packages.${system}.default}/bin/deploy .#openstack --hostname "$HOST" "$@"
-                '';
-              in
-              "${script}";
+            program = "${deploy-openstack-script}";
           };
         }
       );
