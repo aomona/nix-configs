@@ -16,7 +16,7 @@ let
     ];
 
     users.deploy.authorizedKeys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEl0CHSwhFrBL+gbMqmas4c3uXTZajD3A4Ns2xLYkgVe github-actions-deploy"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA0cl+EdTJh1MxftdC1ePO0C4oXajt7JzJrltg0kwR0U github-actions-deploy"
     ];
   };
 in
