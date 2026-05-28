@@ -19,7 +19,7 @@ in
 
     servers.fabric-smp = {
       enable = true;
-      package = pkgs.fabricServers.fabric-1_21_5;
+      package = pkgs.fabricServers.fabric-26_1_2;
       jvmOpts = minecraftData.jvmOpts or "-Xms4G -Xmx8G";
 
       serverProperties = {
@@ -28,7 +28,7 @@ in
         gamemode = "survival";
         difficulty = "normal";
         max-players = 20;
-        white-list = false;
+        white-list = true;
         online-mode = true;
         view-distance = 10;
         simulation-distance = 10;
@@ -37,8 +37,25 @@ in
       symlinks.mods = pkgs.linkFarmFromDrvs "mods" (
         builtins.attrValues {
           FabricApi = pkgs.fetchurl {
-            url = "https://cdn.modrinth.com/data/P7dR8mSH/versions/kKEGlsne/fabric-api-0.128.2%2B1.21.5.jar";
-            sha512 = "0e42b72d1a63a45c1b64cdabafd15f4d236bbda5521964d687afa1f833d4022f96c7ffab5dd4471aba0190be588f092d156bf14a50b794895fb3286ec899bcf7";
+            url = "https://cdn.modrinth.com/data/P7dR8mSH/versions/E1mjhYMF/fabric-api-0.150.0%2B26.1.2.jar";
+            sha512 = "238c793b720ed21d2d5b564eca88c714cf2188f7b0fb1fd30864660f80901e2b4dad273994b6f77de3c0aa365f930ed8aaccffac49b36c6456b153b52d5d21dc";
+          };
+          Lithium = pkgs.fetchurl {
+            url = "https://cdn.modrinth.com/data/gvQqBUqZ/versions/Nt50x0fz/lithium-fabric-0.24.3%2Bmc26.1.2.jar";
+            sha512 = "b6f948576b062f83f1b13033c3f1121a3d4add8f8294415f8d283caeb91ca28acc1e19fb021a8807a034ff9875ef0dd9b6054734d552e072336aa060a106044f";
+          };
+          Carpet = pkgs.fetchurl {
+            # https://github.com/gnembon/fabric-carpet/releases
+            url = "https://github.com/gnembon/fabric-carpet/releases/download/v26.1/fabric-carpet-26.1+v260402.jar";
+            sha256 = "59bd225d12423a7d7a635ca0c94fa786f97ccebb116922b16d76072da4ee67e7";
+          };
+          Servux = pkgs.fetchurl {
+            url = "https://cdn.modrinth.com/data/zQhsx8KF/versions/eu63Kj9A/servux-fabric-26.1.2-0.10.2.jar";
+            sha512 = "78566cebcc5e181c68fc7f78c2f34213d634ae930f82cdfad19dd65ac4e6b24ae6d541a200b069e07e32e90b5c827d1cc1e80809da376bfbabfc8b302f9f256a";
+          };
+          Vivecraft = pkgs.fetchurl {
+            url = "https://cdn.modrinth.com/data/wGoQDPN5/versions/dAFnGtKk/vivecraft-26.1.2-1.3.8-fabric.jar";
+            sha512 = "3228489a2ff1191d90a47c0a50d11aa19c6a818032c8657bd530e7c1fbd7cdfca5c2e3062c9da2de868407b83e94f16c57bc44d4537d9538b08f1d9f584037a9";
           };
         }
       );
