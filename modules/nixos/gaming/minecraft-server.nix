@@ -34,6 +34,14 @@ in
         simulation-distance = 10;
       };
 
+      whitelist = {
+        aomona = "02992baf-9329-4c6a-b893-3e4b5ce37ca1";
+        akaz_dango = "644d4fc6-1525-4426-9eb9-7c7877883e81";
+        tokuzou0829 = "67ddca9d-42aa-4522-adc8-ab904eff34cd";
+        shu_tti = "379c2f07-08d5-4b0e-9fe6-6fd044723d64";
+        t4ko_uwu = "aedb2b9b-2fd3-415b-aa29-bac9a430a618"
+      };
+
       symlinks.mods = pkgs.linkFarmFromDrvs "mods" (
         builtins.attrValues {
           FabricApi = pkgs.fetchurl {
