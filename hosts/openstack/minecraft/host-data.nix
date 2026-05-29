@@ -6,8 +6,20 @@ let
     };
 
     minecraft = {
-      serverPort = 25565;
-      jvmOpts = "-Xms1G -Xmx2G";
+      # Shared secret for Velocity modern forwarding.
+      # Must match the value on the gateway host.
+      # FIXME: Migrate to sops-nix for production use.
+      velocitySecret = "changeme-please-replace-at-deploy-time";
+
+      smp = {
+        serverPort = 25566;
+        jvmOpts = "-Xms1G -Xmx2G";
+      };
+
+      creative = {
+        serverPort = 25568;
+        jvmOpts = "-Xms1G -Xmx2G";
+      };
     };
 
     users.${hostMeta.primaryUser}.authorizedKeys = [
