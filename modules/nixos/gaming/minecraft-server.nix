@@ -45,6 +45,19 @@ in
         yuta_kobayashi = "cfcc92a7-7b55-4b45-a13f-0eebf716e5f3";
       };
 
+      operators = {
+        moons14 = {
+          uuid = "ede38872-25c5-414f-a04e-278b521d9f41";
+          level = 1;
+          bypassesPlayerLimit = false;
+        };
+        akaz_dango = {
+          uuid = "644d4fc6-1525-4426-9eb9-7c7877883e81";
+          level = 4;
+          bypassesPlayerLimit = true;
+        };
+      };
+
       symlinks.mods = pkgs.linkFarmFromDrvs "mods" (
         builtins.attrValues {
           FabricApi = pkgs.fetchurl {
