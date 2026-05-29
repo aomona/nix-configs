@@ -40,6 +40,9 @@ in
         tokuzou0829 = "67ddca9d-42aa-4522-adc8-ab904eff34cd";
         shu_tti = "379c2f07-08d5-4b0e-9fe6-6fd044723d64";
         t4ko_uwu = "aedb2b9b-2fd3-415b-aa29-bac9a430a618";
+        moons14 = "ede38872-25c5-414f-a04e-278b521d9f41";
+        fa0311 = "7dfc7f95-df6f-435f-85f4-71513cc8fa87";
+        yuta_kobayashi = "cfcc92a7-7b55-4b45-a13f-0eebf716e5f3";
       };
 
       symlinks.mods = pkgs.linkFarmFromDrvs "mods" (
