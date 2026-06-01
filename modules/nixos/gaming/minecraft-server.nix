@@ -15,6 +15,10 @@ in
 
   nixpkgs.overlays = [ inputs.minecraft-nix.overlay ];
 
+  system.extraDependencies = [
+    ./server-icon.png
+  ];
+
   services.minecraft-servers = {
     enable = true;
     eula = true;
@@ -24,6 +28,10 @@ in
       enable = true;
       package = (pkgs.fabricServers.fabric-26_1_2.override { jre_headless = pkgs.jdk25; });
       jvmOpts = minecraftData.jvmOpts or "-Xms4G -Xmx8G";
+
+      files = {
+        "server-icon.png" = ./server-icon.png;
+      };
 
       serverProperties = {
         server-port = minecraftData.serverPort or 25565;
