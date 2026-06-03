@@ -174,6 +174,7 @@ in
 
       files = {
         "server-icon.png" = ./server-icon.png;
+        "config/FabricProxy-Lite.toml" = config.sops.templates."fabric-smp-proxy-config".path;
       };
 
       serverProperties = {
@@ -206,7 +207,6 @@ in
 
       symlinks = {
         mods = smpModsLink;
-        "config/FabricProxy-Lite.toml" = config.sops.templates."fabric-smp-proxy-config".path;
       };
     };
 
@@ -235,9 +235,12 @@ in
         };
       }
       // {
+        files = {
+          "config/FabricProxy-Lite.toml" = config.sops.templates."fabric-creative-proxy-config".path;
+        };
+
         symlinks = {
           mods = creativeModsLink;
-          "config/FabricProxy-Lite.toml" = config.sops.templates."fabric-creative-proxy-config".path;
         };
       };
   };
