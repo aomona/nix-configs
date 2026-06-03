@@ -38,7 +38,7 @@ in
         motd = "&#x00a7bNixOS Minecraft Network"
         show-max-players = 500
         online-mode = true
-        player-info-forwarding-mode = "MODERN"
+        player-info-forwarding-mode = "modern"
         forwarding-secret-file = "${config.sops.secrets.velocity-forwarding-secret.path}"
 
         [servers]
