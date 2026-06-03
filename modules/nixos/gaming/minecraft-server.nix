@@ -132,10 +132,6 @@ in
   imports = [ inputs.minecraft-nix.nixosModules.minecraft-servers ];
   nixpkgs.overlays = [ inputs.minecraft-nix.overlay ];
 
-  system.extraDependencies = [
-    ./server-icon.png
-  ];
-
   sops = {
     secrets.velocity-forwarding-secret = {
       sopsFile = ../../../secrets/openstack/gateway/velocity.yaml;
@@ -174,10 +170,6 @@ in
       autoStart = true;
       package = fabricPackage;
       jvmOpts = smpData.jvmOpts or "-Xms4G -Xmx8G";
-
-      files = {
-        "server-icon.png" = ./server-icon.png;
-      };
 
       serverProperties = {
         server-port = smpData.serverPort or 25565;
