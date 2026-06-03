@@ -109,6 +109,9 @@ let
       enable = true;
       autoStart = true;
       package = fabricPackage;
+      environment = {
+        FABRIC_PROXY_SECRET_FILE = config.sops.secrets.velocity-forwarding-secret.path;
+      };
       jvmOpts = serverData.jvmOpts or jvmOpts;
       serverProperties = {
         server-port = serverData.serverPort or port;
@@ -142,7 +145,6 @@ in
     templates = {
       "fabric-smp-proxy-config" = {
         content = ''
-          secret = "${config.sops.placeholder."velocity-forwarding-secret"}"
           disconnectMessage = "This server requires you to connect with Velocity."
         '';
         owner = config.services.minecraft-servers.user or "minecraft";
@@ -151,7 +153,6 @@ in
 
       "fabric-creative-proxy-config" = {
         content = ''
-          secret = "${config.sops.placeholder."velocity-forwarding-secret"}"
           disconnectMessage = "This server requires you to connect with Velocity."
         '';
         owner = config.services.minecraft-servers.user or "minecraft";
@@ -171,6 +172,9 @@ in
       autoStart = true;
       package = fabricPackage;
       jvmOpts = smpData.jvmOpts or "-Xms4G -Xmx8G";
+      environment = {
+        FABRIC_PROXY_SECRET_FILE = config.sops.secrets.velocity-forwarding-secret.path;
+      };
 
       files = {
         "server-icon.png" = ./server-icon.png;
