@@ -231,18 +231,11 @@ in
 
         inherit whitelist;
 
-        operators = {
-          moons14 = {
-            uuid = "ede38872-25c5-414f-a04e-278b521d9f41";
-            level = 4;
-            bypassesPlayerLimit = true;
-          };
-          akaz_dango = {
-            uuid = "644d4fc6-1525-4426-9eb9-7c7877883e81";
-            level = 4;
-            bypassesPlayerLimit = true;
-          };
-        };
+        operators = builtins.mapAttrs (_: uuid: {
+          inherit uuid;
+          level = 4;
+          bypassesPlayerLimit = true;
+        }) whitelist;
       }
       // {
         symlinks = {
