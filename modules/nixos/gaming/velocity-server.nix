@@ -7,6 +7,7 @@
 }:
 let
   velocityData = hostMeta.hostData.velocity or { };
+  discordIntegrationData = velocityData.discordIntegration or { };
   minecraftData = hostMeta.hostData.minecraft or { };
 
   proxyPort = toString (velocityData.serverPort or 25565);
@@ -18,6 +19,33 @@ let
   primaryInterface =
     hostMeta.hostData.networking.primaryInterface
       or (throw "hostData.networking.primaryInterface must be set");
+  discordIntegrationVelocity = pkgs.fetchurl {
+    url = "https://github.com/zunoser/discord-integration-velocity/releases/download/v1.0.2/discord-integration-velocity-1.0.2.jar";
+    sha256 = "b574c60fbcecf0b2e3eba94ed007acaa6b1bf761807a8bebdef9e0e0e7d98923";
+  };
+  discordIntegrationConfig = {
+    discord = {
+      enabled = discordIntegrationData.discordEnabled or true;
+      token = config.sops.placeholder.discord-integration-token;
+      channelId = config.sops.placeholder.discord-integration-channel-id;
+      status = discordIntegrationData.discordStatus or "Minecraft chat";
+    };
+    minecraft = {
+      broadcastDiscordMessages = discordIntegrationData.broadcastDiscordMessages or true;
+      broadcastMinecraftChatToOtherServers =
+        discordIntegrationData.broadcastMinecraftChatToOtherServers or true;
+      syncedServers = discordIntegrationData.syncedServers or [ "*" ];
+    };
+    embeds = {
+      joinLeave = discordIntegrationData.embeds.joinLeave or true;
+      serverSwitch = discordIntegrationData.embeds.serverSwitch or true;
+      death = discordIntegrationData.embeds.death or true;
+      joinColor = discordIntegrationData.embeds.joinColor or 4437377;
+      leaveColor = discordIntegrationData.embeds.leaveColor or 15746887;
+      switchColor = discordIntegrationData.embeds.switchColor or 16426522;
+      deathColor = discordIntegrationData.embeds.deathColor or 10038562;
+    };
+  };
 in
 {
   imports = [ inputs.minecraft-nix.nixosModules.minecraft-servers ];
@@ -30,31 +58,49 @@ in
       owner = config.services.minecraft-servers.user or "minecraft";
       mode = "0400";
     };
-
-    # Generated at activation time with the decrypted forwarding secret.
-    templates."velocity.toml" = {
-      content = ''
-        config-version = "2.8"
-        bind = "0.0.0.0:${proxyPort}"
-        motd = "<red>n<gold>a<yellow>k<green>a<aqua>s<blue>y<light_purple>o<red>u <gold>b<yellow>a<green>k<aqua>e<blue>r<light_purple>y <red>M<gold>i<yellow>n<green>e<aqua>c<blue>r<light_purple>a<red>f<gold>t <yellow>S<green>e<aqua>r<blue>v<light_purple>e<red>r"
-        show-max-players = 500
-        sample-players-in-ping = true
-        online-mode = true
-        player-info-forwarding-mode = "modern"
-        forwarding-secret-file = "${config.sops.secrets.velocity-forwarding-secret.path}"
-
-        [servers]
-        smp = "${minecraftInternalIp}:${smpPort}"
-        creative = "${minecraftInternalIp}:${creativePort}"
-        try = ["smp"]
-
-        [forced-hosts]
-
-        [advanced]
-        compression-level = 1
-      '';
+    secrets.discord-integration-token = {
+      sopsFile = ../../../secrets/openstack/gateway/velocity.yaml;
       owner = config.services.minecraft-servers.user or "minecraft";
       mode = "0400";
+    };
+    secrets.discord-integration-channel-id = {
+      sopsFile = ../../../secrets/openstack/gateway/velocity.yaml;
+      owner = config.services.minecraft-servers.user or "minecraft";
+      mode = "0400";
+    };
+
+    # Generated at activation time with the decrypted forwarding secret.
+    templates = {
+      "velocity.toml" = {
+        content = ''
+          config-version = "2.8"
+          bind = "0.0.0.0:${proxyPort}"
+          motd = "<red>n<gold>a<yellow>k<green>a<aqua>s<blue>y<light_purple>o<red>u <gold>b<yellow>a<green>k<aqua>e<blue>r<light_purple>y <red>M<gold>i<yellow>n<green>e<aqua>c<blue>r<light_purple>a<red>f<gold>t <yellow>S<green>e<aqua>r<blue>v<light_purple>e<red>r"
+          show-max-players = 500
+          sample-players-in-ping = true
+          online-mode = true
+          player-info-forwarding-mode = "modern"
+          forwarding-secret-file = "${config.sops.secrets.velocity-forwarding-secret.path}"
+
+          [servers]
+          smp = "${minecraftInternalIp}:${smpPort}"
+          creative = "${minecraftInternalIp}:${creativePort}"
+          try = ["smp"]
+
+          [forced-hosts]
+
+          [advanced]
+          compression-level = 1
+        '';
+        owner = config.services.minecraft-servers.user or "minecraft";
+        mode = "0400";
+      };
+
+      "discord-integration-velocity-config.json" = {
+        content = builtins.toJSON discordIntegrationConfig;
+        owner = config.services.minecraft-servers.user or "minecraft";
+        mode = "0400";
+      };
     };
   };
 
@@ -81,12 +127,19 @@ in
       # velocity.toml during config migration (e.g., legacy forwarding-secret
       # → forwarding.secret file in Velocity 3.5.0+).
       # `files` creates a writable copy; cleaned on service stop.
-      files."velocity.toml" = config.sops.templates."velocity.toml".path;
+      files = {
+        "velocity.toml" = config.sops.templates."velocity.toml".path;
+        "plugins/discordintegrationvelocity/config.json" =
+          config.sops.templates."discord-integration-velocity-config.json".path;
+      };
+
+      symlinks."plugins/discord-integration-velocity-1.0.2.jar" = discordIntegrationVelocity;
     };
   };
 
   systemd.services.minecraft-server-velocity.restartTriggers = [
     config.sops.templates."velocity.toml".content
+    config.sops.templates."discord-integration-velocity-config.json".content
   ];
 
   networking = {

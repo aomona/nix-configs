@@ -58,6 +58,10 @@ let
       url = "https://github.com/zunoser/nakasyou-bakery-mod/releases/download/v1.4/nakasyou-bakery-mod-1.4.jar";
       sha256 = "3b0f4f92a15d6a2f6bc5f3a7982b8515c1c7de72f88e5b0a1545258bfff4b857";
     };
+    DiscordIntegrationFabricBackend = pkgs.fetchurl {
+      url = "https://github.com/zunoser/discord-integration-velocity/releases/download/v1.0.2/discord-integration-fabric-backend-1.0.2.jar";
+      sha256 = "2e5c205084dbb5d25e35907329b74c045475114e9b65650ab9cba71050892620";
+    };
   };
 
   # Derive a linkFarm from the mod attribute set
