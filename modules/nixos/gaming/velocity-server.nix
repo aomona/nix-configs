@@ -22,31 +22,8 @@ let
     url = "https://github.com/zunoser/discord-integration-velocity/releases/download/v1.0.2/discord-integration-velocity-1.0.2.jar";
     sha256 = "b574c60fbcecf0b2e3eba94ed007acaa6b1bf761807a8bebdef9e0e0e7d98923";
   };
-  discordIntegrationConfig = {
-    discord = {
-      enabled = true;
-      token = config.sops.placeholder.discord-token;
-      channelId = config.sops.placeholder.discord-channel-id;
-      status = "Minecraft chat";
-    };
-    minecraft = {
-      broadcastDiscordMessages = true;
-      broadcastMinecraftChatToOtherServers = true;
-      syncedServers = [
-        "smp"
-        "creative"
-      ];
-    };
-    embeds = {
-      joinLeave = true;
-      serverSwitch = true;
-      death = true;
-      joinColor = 4437377;
-      leaveColor = 15746887;
-      switchColor = 16426522;
-      deathColor = 10038562;
-    };
-  };
+  discordIntegrationConfig =
+    (import ./discord-integration.nix { inherit config; }).discordIntegrationConfig;
 in
 {
   imports = [ inputs.minecraft-nix.nixosModules.minecraft-servers ];
