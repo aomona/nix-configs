@@ -7,7 +7,6 @@
 }:
 let
   velocityData = hostMeta.hostData.velocity or { };
-  discordIntegrationData = velocityData.discordIntegration or { };
   minecraftData = hostMeta.hostData.minecraft or { };
 
   proxyPort = toString (velocityData.serverPort or 25565);
@@ -25,25 +24,27 @@ let
   };
   discordIntegrationConfig = {
     discord = {
-      enabled = discordIntegrationData.discordEnabled or true;
-      token = config.sops.placeholder.discord-integration-token;
-      channelId = config.sops.placeholder.discord-integration-channel-id;
-      status = discordIntegrationData.discordStatus or "Minecraft chat";
+      enabled = true;
+      token = "";
+      channelId = "";
+      status = "Minecraft chat";
     };
     minecraft = {
-      broadcastDiscordMessages = discordIntegrationData.broadcastDiscordMessages or true;
-      broadcastMinecraftChatToOtherServers =
-        discordIntegrationData.broadcastMinecraftChatToOtherServers or true;
-      syncedServers = discordIntegrationData.syncedServers or [ "*" ];
+      broadcastDiscordMessages = true;
+      broadcastMinecraftChatToOtherServers = true;
+      syncedServers = [
+        "smp"
+        "creative"
+      ];
     };
     embeds = {
-      joinLeave = discordIntegrationData.embeds.joinLeave or true;
-      serverSwitch = discordIntegrationData.embeds.serverSwitch or true;
-      death = discordIntegrationData.embeds.death or true;
-      joinColor = discordIntegrationData.embeds.joinColor or 4437377;
-      leaveColor = discordIntegrationData.embeds.leaveColor or 15746887;
-      switchColor = discordIntegrationData.embeds.switchColor or 16426522;
-      deathColor = discordIntegrationData.embeds.deathColor or 10038562;
+      joinLeave = true;
+      serverSwitch = true;
+      death = true;
+      joinColor = 4437377;
+      leaveColor = 15746887;
+      switchColor = 16426522;
+      deathColor = 10038562;
     };
   };
 in
@@ -54,16 +55,6 @@ in
 
   sops = {
     secrets.velocity-forwarding-secret = {
-      sopsFile = ../../../secrets/openstack/gateway/velocity.yaml;
-      owner = config.services.minecraft-servers.user or "minecraft";
-      mode = "0400";
-    };
-    secrets.discord-integration-token = {
-      sopsFile = ../../../secrets/openstack/gateway/velocity.yaml;
-      owner = config.services.minecraft-servers.user or "minecraft";
-      mode = "0400";
-    };
-    secrets.discord-integration-channel-id = {
       sopsFile = ../../../secrets/openstack/gateway/velocity.yaml;
       owner = config.services.minecraft-servers.user or "minecraft";
       mode = "0400";
