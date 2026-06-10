@@ -25,8 +25,8 @@ let
   discordIntegrationConfig = {
     discord = {
       enabled = true;
-      token = config.sops.placeholder.discord-integration-token;
-      channelId = config.sops.placeholder.discord-integration-channel-id;
+      token = config.sops.placeholder.discord-token;
+      channelId = config.sops.placeholder.discord-channel-id;
       status = "Minecraft chat";
     };
     minecraft = {
@@ -59,12 +59,12 @@ in
       owner = config.services.minecraft-servers.user or "minecraft";
       mode = "0400";
     };
-    secrets.discord-integration-token = {
+    secrets.discord-token = {
       sopsFile = ../../../secrets/openstack/gateway/velocity.yaml;
       owner = config.services.minecraft-servers.user or "minecraft";
       mode = "0400";
     };
-    secrets.discord-integration-channel-id = {
+    secrets.discord-channel-id = {
       sopsFile = ../../../secrets/openstack/gateway/velocity.yaml;
       owner = config.services.minecraft-servers.user or "minecraft";
       mode = "0400";
